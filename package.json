@@ -1,0 +1,21 @@
+{
+  "name": "expensemanager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && npm start",
+    "client": "cd frontend && npm start"
+  },
+  "keywords": [
+    "Expense Manager",
+    "Expense",
+    "ExpenseManager"
+  ],
+  "author": "Aman Kumar",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
