@@ -1,0 +1,35 @@
+### get all user details
+GET http://localhost:3001/api/v1/users/
+
+### get user details
+GET http://localhost:3001/api/v1/users/id
+
+### create user
+POST http://localhost:3001/api/v1/users/
+
+### update user
+PATCH http://localhost:3001/api/v1/users/id
+
+### delete user
+DELETE http://localhost:3001/api/v1/users/
+
+### delete user
+DELETE http://localhost:3001/api/v1/users/id
+
+### get all expenses of current user
+GET http://localhost:3001/api/v1/expenses/
+
+### get expense of current user
+GET http://localhost:3001/api/v1/expenses/id
+
+### create new expenses of current user
+POST http://localhost:3001/api/v1/expenses/
+
+### update the existing expense of current user
+PATCH http://localhost:3001/api/v1/expenses/id
+
+### delete the expense of current user
+DELETE  http://localhost:3001/api/v1/expenses/id
+
+### delete all expenses of current user
+DELETE  http://localhost:3001/api/v1/expenses/

@@ -7,7 +7,7 @@ function App() {
 
   const getData = async () => {
     await axios
-      .get("http://localhost:3001/")
+      .get("http://localhost:3001/api/v1/users/")
       .then((res) => {
         console.log(res);
         setData(res.data);
