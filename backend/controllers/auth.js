@@ -1,7 +1,7 @@
 import UserModel from "../models/userModel.js";
-import { hashSync } from "bcrypt";
+import { compareSync, hashSync } from "bcrypt";
 
-const userId = null;
+let userId = null;
 
 export const getLongUserId = () => {
   return userId;
@@ -14,7 +14,7 @@ export const login = async (req, res) => {
     // Find user by email
     const user = await UserModel.findOne({ email });
 
-    if (!user || user.password != password) {
+    if (!user || !compareSync(password, user.password)) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 

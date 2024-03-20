@@ -3,6 +3,7 @@
 
 ### @name login
 POST {{baseUrl}}/login
+Content-Type: {{contentType}}
 
 {
     "email": "abc@123.com",
