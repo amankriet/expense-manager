@@ -1,13 +1,13 @@
 import { Router } from "express";
+import { login, signup } from "../controllers/auth.js";
 
 const authRouter = Router();
 
 authRouter
-  .post("/login", (req, res) => {
-    res.send("Login Page");
-  })
-  .post("/signup", (req, res) => {
-    res.send("Signup Page");
+  .post("/login", login)
+  .post("/signup", signup)
+  .get("/logout", (req, res) => {
+    res.send("Logged Out");
   });
 
 export default authRouter;

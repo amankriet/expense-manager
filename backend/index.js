@@ -4,6 +4,7 @@ import { config } from "dotenv";
 import authRoute from "./routes/auth.route.js";
 import UserRoute from "./routes/user.route.js";
 import ExpenseRoute from "./routes/expense.route.js";
+import "./config/database.js";
 
 config({
   path: "./.env",

@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import user from "./user";
+import user from "./userModel";
 
 const ExpenseSchema = new Schema(
   {

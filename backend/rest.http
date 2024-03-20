@@ -1,35 +1,62 @@
+@baseUrl = http://localhost:3001/api/v1
+@contentType = application/json
+
+### @name login
+POST {{baseUrl}}/login
+
+{
+    "email": "abc@123.com",
+    "password": "password1"
+}
+
+### signup
+POST {{baseUrl}}/signup
+Content-Type: {{contentType}}
+
+{
+    "firstName": "Aman",
+    "lastName": "Kumar",
+    "email": "abc@123.com",
+    "password": "password1",
+    "mobile": 8439775478,
+    "dob": "1998-01-19"
+}
+
+### logout
+GET {{baseUrl}}/logout
+
 ### get all user details
-GET http://localhost:3001/api/v1/users/
+GET {{baseUrl}}/users/
 
 ### get user details
-GET http://localhost:3001/api/v1/users/id
+GET {{baseUrl}}/users/id
 
 ### create user
-POST http://localhost:3001/api/v1/users/
+POST {{baseUrl}}/users/
 
 ### update user
-PATCH http://localhost:3001/api/v1/users/id
+PATCH {{baseUrl}}/users/id
 
 ### delete user
-DELETE http://localhost:3001/api/v1/users/
+DELETE {{baseUrl}}/users/
 
 ### delete user
-DELETE http://localhost:3001/api/v1/users/id
+DELETE {{baseUrl}}/users/id
 
 ### get all expenses of current user
-GET http://localhost:3001/api/v1/expenses/
+GET {{baseUrl}}/expenses/
 
 ### get expense of current user
-GET http://localhost:3001/api/v1/expenses/id
+GET {{baseUrl}}/expenses/id
 
 ### create new expenses of current user
-POST http://localhost:3001/api/v1/expenses/
+POST {{baseUrl}}/expenses/
 
 ### update the existing expense of current user
-PATCH http://localhost:3001/api/v1/expenses/id
+PATCH {{baseUrl}}/expenses/id
 
 ### delete the expense of current user
-DELETE  http://localhost:3001/api/v1/expenses/id
+DELETE  {{baseUrl}}/expenses/id
 
 ### delete all expenses of current user
-DELETE  http://localhost:3001/api/v1/expenses/
+DELETE  {{baseUrl}}/expenses/
