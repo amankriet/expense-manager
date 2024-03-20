@@ -1,14 +1,12 @@
 import { Router } from "express";
+import passport from "passport";
+import { getAllUsers, getUser } from "../controllers/user.js";
 
 const userRouter = Router();
 
 userRouter
-  .get("/", (req, res) => {
-    res.send("get all users details (test)");
-  })
-  .get("/:id", (req, res) => {
-    res.send("getting info for current user");
-  })
+  .get("/", getAllUsers)
+  .get("/:id", passport.authenticate("jwt", { session: false }), getUser)
   .post("/", (req, res) => {
     res.send("User Created");
   })

@@ -1,5 +1,7 @@
+import jwt from "jsonwebtoken";
 import UserModel from "../models/userModel.js";
 import { compareSync, hashSync } from "bcrypt";
+import "dotenv/config";
 
 let userId = null;
 
@@ -15,17 +17,39 @@ export const login = async (req, res) => {
     const user = await UserModel.findOne({ email });
 
     if (!user || !compareSync(password, user.password)) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      return res.status(401).send({
+        success: false,
+        message: "Invalid Email or Password",
+        error: "Invalid credentials",
+      });
     }
 
     // Set the userId variable
     userId = user._id.toString();
     console.debug("UserId:", userId);
 
-    return res.json({ message: "Login successful", userId: user._id });
+    const payload = {
+      email: email,
+      id: user._id,
+    };
+
+    const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
+      expiresIn: "1d",
+    });
+
+    return res.status(200).send({
+      success: true,
+      message: "Login successful",
+      userId: user._id,
+      token: `Bearer ${accessToken}`,
+    });
   } catch (error) {
     console.error(error.toString());
-    return res.status(500).json({ error: "Server error" });
+    return res.status(500).send({
+      success: false,
+      message: "Server Error",
+      error: error.toString(),
+    });
   }
 };
 
@@ -36,7 +60,11 @@ export const signup = async (req, res) => {
     // check if user already exists
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
-      res.status(400).json("User already exists");
+      res.status(400).send({
+        success: false,
+        message: "Email already exists",
+        error: "User already exists",
+      });
     } else {
       console.log(req.body);
 
@@ -54,20 +82,32 @@ export const signup = async (req, res) => {
       userId = newUser._id.toString();
       console.debug("user id after signup:", userId);
 
-      res.send({
+      const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
+        expiresIn: "1d",
+      });
+
+      res.status(200).send({
         success: true,
         message: "User created successfully",
         user: {
           id: newUser._id,
           name: `${newUser.firstName} ${newUser.lastName}`,
         },
+        token: `Bearer ${accessToken}`,
       });
     }
   } catch (error) {
-    res.send({
+    res.status(500).send({
       success: false,
       message: "Something went wrong",
       error: error.toString(),
     });
   }
+};
+
+export const logout = (req, res) => {
+    res.status(200).send({
+        success: true,
+        message: "Logged out"
+    });
 };

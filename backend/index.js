@@ -5,6 +5,8 @@ import authRoute from "./routes/auth.route.js";
 import UserRoute from "./routes/user.route.js";
 import ExpenseRoute from "./routes/expense.route.js";
 import "./config/database.js";
+import passport from "passport";
+import "./config/passport.js";
 
 config({
   path: "./.env",
@@ -13,6 +15,7 @@ config({
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(passport.initialize());
 
 app.use("/api/v1", authRoute);
 app.use("/api/v1/users", UserRoute);
