@@ -1,7 +1,8 @@
 @baseUrl = http://localhost:3001/api/v1
 @contentType = application/json
 
-### @name login
+### login
+# @name login
 POST {{baseUrl}}/login
 Content-Type: {{contentType}}
 
@@ -30,7 +31,8 @@ GET {{baseUrl}}/logout
 GET {{baseUrl}}/users/
 
 ### get user details
-GET {{baseUrl}}/users/id
+GET {{baseUrl}}/users/65fb0bd924454b7de14bc315
+Authorization: {{login.response.body.token}}
 
 ### create user
 POST {{baseUrl}}/users/

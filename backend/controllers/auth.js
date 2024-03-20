@@ -66,8 +66,6 @@ export const signup = async (req, res) => {
         error: "User already exists",
       });
     } else {
-      console.log(req.body);
-
       // Create new user
       const newUser = await UserModel.create({
         firstName: firstName,
@@ -106,8 +104,8 @@ export const signup = async (req, res) => {
 };
 
 export const logout = (req, res) => {
-    res.status(200).send({
-        success: true,
-        message: "Logged out"
-    });
+  res.status(200).send({
+    success: true,
+    message: "Logged out"
+  });
 };

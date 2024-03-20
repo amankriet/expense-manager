@@ -12,7 +12,6 @@ export const getAllUsers = async (req, res) => {
   } else {
     return res.status(200).send({
       success: true,
-      message: "Users Found",
       users: users.map(({ _id, firstName, lastName, email, mobileNumber }) => {
         return {
           id: _id,
