@@ -1,5 +1,8 @@
 import { connect } from "mongoose";
 import "dotenv/config";
 
-console.log(process.env.DATABASE_URL);
-connect(process.env.DATABASE_URL);
+main().catch((err) => console.log(err));
+
+async function main() {
+  await connect(process.env.DATABASE_URL);
+}
