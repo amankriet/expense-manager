@@ -17,8 +17,5 @@
   "license": "ISC",
   "devDependencies": {
     "concurrently": "^8.2.2"
-  },
-  "dependencies": {
-    "dayjs": "^1.11.10"
   }
 }
