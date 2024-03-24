@@ -28,23 +28,20 @@ Content-Type: {{contentType}}
 GET {{baseUrl}}/logout
 
 ### get all user details
-GET {{baseUrl}}/users/
+# GET {{baseUrl}}/user/
 
 ### get user details
-GET {{baseUrl}}/users/65fb0bd924454b7de14bc315
+GET {{baseUrl}}/user/
 Authorization: {{login.response.body.token}}
 
-### create user
-POST {{baseUrl}}/users/
-
 ### update user
-PATCH {{baseUrl}}/users/id
+PATCH {{baseUrl}}/user/
 
 ### delete user
-DELETE {{baseUrl}}/users/
+DELETE {{baseUrl}}/user/
 
 ### delete user
-DELETE {{baseUrl}}/users/id
+DELETE {{baseUrl}}/user/id
 
 ### get all expenses of current user
 GET {{baseUrl}}/expenses/

@@ -9,9 +9,28 @@ opts.secretOrKey = process.env.JWT_SECRET_KEY;
 passport.use(
   new JwtStrategy(opts, async function (jwt_payload, done) {
     try {
-      const user = await UserModel.findById(jwt_payload.id);
+      let user = await UserModel.findById(jwt_payload.id);
+      let admin = false;
 
       if (user) {
+        const { _id, firstName, lastName, email, mobileNumber, dob } = user;
+        if (email == "amankriet@gmail.com") {
+          admin = true;
+        } else {
+          admin = false;
+        }
+        console.log(admin);
+
+        user = {
+          id: _id,
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          mobileNumber: mobileNumber,
+          dob: dob,
+          admin: admin
+        };
+
         return done(null, user);
       } else {
         return done(null, false);
