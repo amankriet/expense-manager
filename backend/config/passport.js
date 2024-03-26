@@ -10,16 +10,9 @@ passport.use(
   new JwtStrategy(opts, async function (jwt_payload, done) {
     try {
       let user = await UserModel.findById(jwt_payload.id);
-      let admin = false;
 
       if (user) {
-        const { _id, firstName, lastName, email, mobileNumber, dob } = user;
-        if (email == "amankriet@gmail.com") {
-          admin = true;
-        } else {
-          admin = false;
-        }
-        console.log(admin);
+        const { _id, firstName, lastName, email, mobileNumber, dob, role } = user;
 
         user = {
           id: _id,
@@ -28,7 +21,7 @@ passport.use(
           email: email,
           mobileNumber: mobileNumber,
           dob: dob,
-          admin: admin
+          role: role
         };
 
         return done(null, user);

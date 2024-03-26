@@ -27,8 +27,16 @@ const UserSchema = new Schema(
       type: Date,
       required: true,
     },
+    role: {
+      type: String,
+      required: false,
+      maxLength: 30,
+      default: "user"
+    }
   },
   { timestamps: true }
 );
 
-export default model("UserModel", UserSchema);
+const UserModel = model("UserModel", UserSchema);
+
+export default UserModel;
