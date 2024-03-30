@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import { config } from "dotenv";
 import "./config/database.js";
 import passport from "passport";
 import "./config/passport.js";
@@ -8,10 +7,6 @@ import path from "path";
 import fs from "fs";
 
 const __dirname = path.resolve();
-
-config({
-  path: "./.env",
-});
 
 const app = express();
 app.use(cors());

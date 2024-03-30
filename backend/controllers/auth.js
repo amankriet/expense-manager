@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import UserModel from "../models/userModel.js";
 import { compareSync, hashSync } from "bcrypt";
-import "dotenv/config";
 
 let userId = null;
 
