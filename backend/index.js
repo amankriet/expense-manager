@@ -26,7 +26,8 @@ fs.readdirSync(routersPath).map(async (file) => {
   if (file.endsWith("js")) {
     // dynamically import the router module
     const routerModule = await import(path.join(routersPath, file));
-
+    // note: using routerModule.default because that's where the default exported router is. 
+    // Or we can use routerModule.`export router name` if it's not a default export and a named export
     const router = routerModule.default;
 
     app.use(path.join("/api/v1", file.split(".")[0]), router);

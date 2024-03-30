@@ -40,11 +40,8 @@ export const login = async (req, res) => {
       success: true,
       message: "Login successful",
       user: {
-        userId: user._id,
+        id: user._id,
         name: `${user.firstName} ${user.lastName}`,
-        email: email,
-        mobile: user.mobileNumber,
-        dob: user.dob,
         token: `Bearer ${accessToken}`
       }
     });
@@ -58,17 +55,17 @@ export const login = async (req, res) => {
 };
 
 export const signup = async (req, res) => {
-  const { firstName, lastName, email, password, mobile, dob } = req.body;
+  const { firstName, lastName, email, password, mobile, dob, role } = req.body;
 
   try {
     // check if user already exists
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
-      res.status(400).json({
+      res.status(409).json({
         success: false,
         message: "Email already exists",
-        error: "User already exists",
-      });
+        error: "Conflicting email! If you are already registered, please go to login. Else, please check your email address.",
+      })
     } else {
       // Create new user
       const newUser = await UserModel.create({
@@ -78,6 +75,7 @@ export const signup = async (req, res) => {
         password: hashSync(password, 10),
         mobileNumber: mobile,
         dob: dob,
+        role: role
       });
 
       // Set the userId
@@ -92,7 +90,7 @@ export const signup = async (req, res) => {
         expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION,
       });
 
-      res.status(200).json({
+      res.status(201).json({
         success: true,
         message: "User created successfully",
         user: {
@@ -101,6 +99,7 @@ export const signup = async (req, res) => {
           email: email,
           mobile: mobile,
           dob: dob,
+          role: role,
           token: `Bearer ${accessToken}`
         },
       });

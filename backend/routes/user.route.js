@@ -1,17 +1,12 @@
 import { Router } from "express";
 import passport from "passport";
-import { getAllUsers, getIdUser, getUser } from "../controllers/user.js";
+import { deleteUserByID, getAllUsers, getUser, updateUser } from "../controllers/user.js";
 const userRouter = Router();
 
 userRouter
   .get("/", passport.authenticate("jwt", { session: false }), getAllUsers)
-  .get("/user", passport.authenticate("jwt", { session: false }), getUser)
-  .get("/:id", passport.authenticate("jwt", { session: false }), getIdUser)
-  .patch((req, res) => {
-    res.send("update current user details");
-  })
-  .delete((req, res) => {
-    res.send("delete current user details");
-  });
+  .get("/:id", passport.authenticate("jwt", { session: false }), getUser)
+  .patch("/:id/update", passport.authenticate("jwt", { session: false }), updateUser)
+  .delete("/:id/delete", passport.authenticate("jwt", { session: false }), deleteUserByID);
 
 export default userRouter;

@@ -1,27 +1,28 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, ObjectId } from "mongoose";
 
 const UserSchema = new Schema(
   {
     firstName: {
       type: String,
-      required: true,
+      required: true
     },
     lastName: {
       type: String,
-      required: true,
+      required: true
     },
     email: {
       type: String,
       unique: true,
-      required: true,
+      required: true
     },
     password: {
       type: String,
-      required: true,
+      required: true
     },
     mobileNumber: {
       type: Number,
       required: true,
+      unique: true
     },
     dob: {
       type: Date,
@@ -32,6 +33,10 @@ const UserSchema = new Schema(
       required: false,
       maxLength: 30,
       default: "user"
+    },
+    lastUpdatedBy: {
+      type: ObjectId,
+      default: null
     }
   },
   { timestamps: true }

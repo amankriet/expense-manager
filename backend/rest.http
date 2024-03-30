@@ -3,7 +3,7 @@
 
 ### login
 # @name login
-POST {{baseUrl}}/login
+POST {{baseUrl}}/auth/login
 Content-Type: {{contentType}}
 
 {
@@ -12,7 +12,7 @@ Content-Type: {{contentType}}
 }
 
 ### signup
-POST {{baseUrl}}/signup
+POST {{baseUrl}}/auth/signup
 Content-Type: {{contentType}}
 
 {
@@ -25,7 +25,7 @@ Content-Type: {{contentType}}
 }
 
 ### logout
-GET {{baseUrl}}/logout
+GET {{baseUrl}}/auth/logout
 
 ### get all user details
 # GET {{baseUrl}}/user/
