@@ -7,9 +7,14 @@
 - Reactjs
   - Axios
 - Nodejs
-  - Express
+  - Express.js
   - cors
-  - mongodb
+  - mongoose
+  - passport.js
+  - bcrypt
+  - days
+  - jsonwebtoken
+  - passport-jwt
 - concurrency
 
 © Aman Kumar
