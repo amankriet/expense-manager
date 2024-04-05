@@ -1,9 +1,9 @@
 import { Schema, model } from "mongoose";
-import user from "./userModel";
+import user from "./UserModel.js";
 
 const ExpenseSchema = new Schema(
   {
-    user: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: user,
       required: true,

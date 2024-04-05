@@ -1,9 +1,10 @@
 import jwt from "jsonwebtoken";
-import UserModel from "../models/userModel.js";
-import { compareSync, hashSync } from "bcrypt";
+import UserModel from "../models/UserModel.js";
+import { compareSync } from "bcrypt";
 
 let userId = null;
 
+// check if user value gets reset after server restarts
 export const getLongUserId = () => {
   return userId;
 };
@@ -60,7 +61,7 @@ export const signup = async (req, res) => {
     // check if user already exists
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
-      res.status(409).json({
+      return res.status(409).json({
         success: false,
         message: "Email already exists",
         error: "Conflicting email! If you are already registered, please go to login. Else, please check your email address.",
@@ -71,7 +72,7 @@ export const signup = async (req, res) => {
         firstName: firstName,
         lastName: lastName,
         email: email,
-        password: hashSync(password, 10),
+        password: password,
         mobileNumber: mobile,
         dob: dob,
         role: role
@@ -89,7 +90,7 @@ export const signup = async (req, res) => {
         expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION,
       });
 
-      res.status(201).json({
+      return res.status(201).json({
         success: true,
         message: "User created successfully",
         user: {
@@ -104,7 +105,7 @@ export const signup = async (req, res) => {
       });
     }
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Something went wrong",
       error: error.toString(),
@@ -113,8 +114,25 @@ export const signup = async (req, res) => {
 };
 
 export const logout = (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Logged out"
+  userId = null
+
+  const payload = {
+    email: req.user.email,
+    id: req.user.id
+  }
+
+  console.log(payload)
+
+  const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
+    expiresIn: process.env.JWT_LOGOUT_TOKEN_EXPIRATION,
   });
+
+  req.logout(cb => {
+    return res.status(200).json({
+      success: true,
+      message: "Logout Successful",
+      accessToken: accessToken,
+      cb: cb
+    })
+  })
 };

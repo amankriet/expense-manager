@@ -1,4 +1,4 @@
-import UserModel from "../models/userModel.js";
+import UserModel from "../models/UserModel.js";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat.js";
 import { getLongUserId } from "./auth.js";

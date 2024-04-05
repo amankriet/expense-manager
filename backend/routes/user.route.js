@@ -3,10 +3,12 @@ import passport from "passport";
 import { deleteUserByID, getAllUsers, getUser, updateUser } from "../controllers/user.js";
 const userRouter = Router();
 
+userRouter.use(passport.authenticate("jwt", { session: false }))
+
 userRouter
-  .get("/", passport.authenticate("jwt", { session: false }), getAllUsers)
-  .get("/:id", passport.authenticate("jwt", { session: false }), getUser)
-  .patch("/:id/update", passport.authenticate("jwt", { session: false }), updateUser)
-  .delete("/:id/delete", passport.authenticate("jwt", { session: false }), deleteUserByID);
+  .get("/", getAllUsers)
+  .get("/:id", getUser)
+  .patch("/:id", updateUser)
+  .delete("/:id", deleteUserByID);
 
 export default userRouter;

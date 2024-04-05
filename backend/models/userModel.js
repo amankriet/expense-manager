@@ -1,4 +1,5 @@
-import { Schema, model, ObjectId } from "mongoose";
+import { hashSync } from "bcrypt";
+import { Schema, model, Types } from "mongoose";
 
 const UserSchema = new Schema(
   {
@@ -32,15 +33,20 @@ const UserSchema = new Schema(
       type: String,
       required: false,
       maxLength: 30,
-      default: "user"
+      default: "asas"
     },
     lastUpdatedBy: {
-      type: ObjectId,
+      type: Types.ObjectId,
       default: null
     }
   },
   { timestamps: true }
 );
+
+UserSchema.pre("save", function (next) {
+  this.password = hashSync(this.password, 10)
+  next()
+})
 
 const UserModel = model("UserModel", UserSchema);
 

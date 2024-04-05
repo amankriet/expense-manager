@@ -18,8 +18,8 @@ Content-Type: {{contentType}}
 {
     "firstName": "Aman",
     "lastName": "Kumar",
-    "email": "abc@123.com",
-    "password": "password1",
+    "email": "dhruv@gmail.com",
+    "password": "dhruv",
     "mobile": 8439775478,
     "dob": "1998-01-19"
 }
@@ -32,7 +32,7 @@ GET {{baseUrl}}/auth/logout
 
 ### get user details
 GET {{baseUrl}}/user/
-Authorization: {{login.response.body.token}}
+Authorization: {{login.response.body.user.token}}
 
 ### update user
 PATCH {{baseUrl}}/user/
@@ -44,19 +44,31 @@ DELETE {{baseUrl}}/user/
 DELETE {{baseUrl}}/user/id
 
 ### get all expenses of current user
-GET {{baseUrl}}/expenses/
+GET {{baseUrl}}/expense/?perPage=3&curPage=3
+Authorization: {{login.response.body.user.token}}
 
 ### get expense of current user
-GET {{baseUrl}}/expenses/id
+GET {{baseUrl}}/expense/123
+Authorization: {{login.response.body.user.token}}
 
-### create new expenses of current user
-POST {{baseUrl}}/expenses/
+### create new expense for current user
+POST {{baseUrl}}/expense
+Authorization: {{login.response.body.user.token}}
+Content-Type: {{contentType}}
+
+{
+    "title": "Snacks",
+    "amount": 10,
+    "date": "2024-01-20",
+    "category": "Food and Drinks",
+    "description": "test"
+}
 
 ### update the existing expense of current user
-PATCH {{baseUrl}}/expenses/id
+PATCH {{baseUrl}}/expense/id
 
 ### delete the expense of current user
-DELETE  {{baseUrl}}/expenses/id
+DELETE  {{baseUrl}}/expense/id
 
-### delete all expenses of current user
-DELETE  {{baseUrl}}/expenses/
+### delete all expense of current user
+DELETE  {{baseUrl}}/expense/

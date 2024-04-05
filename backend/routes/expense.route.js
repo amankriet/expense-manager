@@ -1,25 +1,52 @@
-import { Router } from "express";
+/**
+ * CRUD
+ * Monthly Expenses
+ * Weekly Expenses
+ * Date Filter (Start and End Date)
+ * Categories based
+ */
 
-const expenseRouter = Router();
+import { Router } from "express";
+import passport from "passport";
+import { addExpense, getAllExpenses } from "../controllers/expense.js";
+import ExpenseModel from "../models/ExpenseModel.js";
+
+const expenseRouter = Router()
+
+expenseRouter.use(passport.authenticate("jwt", { session: false }))
 
 expenseRouter
-  .get("/", (req, res) => {
-    res.send("fetch all expenses of current user");
-  })
   .get("/:id", (req, res) => {
-    res.send("fetch expense of current user");
+    res.status(200).json({
+      success: true,
+      message: `Get expense ${req.params.id} data`
+    })
   })
-  .post("/", (req, res) => {
-    res.send("create new expenses for current user");
-  })
+  .post("/", addExpense)
   .patch("/:id", (req, res) => {
-    res.send("update the existing expense of current user");
+    res.status(200).json({
+      success: true,
+      message: `Update expense ${req.params.id} data`
+    })
   })
   .delete("/:id", (req, res) => {
-    res.send("remove the expense from current user");
+    res.status(200).json({
+      success: true,
+      message: `Delete expense ${req.params.id} data`
+    })
   })
-  .delete("/", (req, res) => {
-    res.send("remove all the expenses from current user");
-  });
+  .get("/", getAllExpenses)
 
-export default expenseRouter;
+expenseRouter.param("id", (req, res) => {
+  console.log(`${req.params.id}`)
+
+  if (!ExpenseModel.findById(req.params.id)) {
+    res.status(404).json({
+      success: false,
+      message: "No matching expense found",
+      error: "Not Found"
+    })
+  }
+})
+
+export default expenseRouter
