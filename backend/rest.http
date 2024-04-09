@@ -2,13 +2,13 @@
 @contentType = application/json
 
 ### login
-# @name login
+# @name auth
 POST {{baseUrl}}/auth/login
 Content-Type: {{contentType}}
 
 {
-    "email": "abc@123.com",
-    "password": "password1"
+    "email": "amankriet@gmail.com",
+    "password": "password2"
 }
 
 ### signup
@@ -16,44 +16,51 @@ POST {{baseUrl}}/auth/signup
 Content-Type: {{contentType}}
 
 {
-    "firstName": "Aman",
+    "firstName": "Dhruv",
     "lastName": "Kumar",
     "email": "dhruv@gmail.com",
     "password": "dhruv",
-    "mobile": 8439775478,
-    "dob": "1998-01-19"
+    "mobile": 1111111111,
+    "dob": "1998-01-20"
 }
 
 ### logout
+# @name auth
 GET {{baseUrl}}/auth/logout
+Authorization: {{auth.response.body.user.token}}
 
-### get all user details
-# GET {{baseUrl}}/user/
+### get all users details
+GET {{baseUrl}}/users/all?curPage=1&perPage=10
+Authorization: {{auth.response.body.user.token}}
 
-### get user details
-GET {{baseUrl}}/user/
-Authorization: {{login.response.body.user.token}}
+### get current user or user id details
+GET {{baseUrl}}/users?id=65faf91627523044e548b12b
+Authorization: {{auth.response.body.user.token}}
 
-### update user
-PATCH {{baseUrl}}/user/
+### update current user or user id data
+PATCH {{baseUrl}}/users?id=65faf91627523044e548b12b
+Authorization: {{auth.response.body.user.token}}
+Content-Type: {{contentType}}
 
-### delete user
-DELETE {{baseUrl}}/user/
+{
+    "lastName": "Kumar"
+}
 
-### delete user
-DELETE {{baseUrl}}/user/id
+### delete current user or user id
+DELETE {{baseUrl}}/users
+Authorization: {{auth.response.body.user.token}}
 
 ### get all expenses of current user
-GET {{baseUrl}}/expense/?perPage=3&curPage=3
-Authorization: {{login.response.body.user.token}}
+GET {{baseUrl}}/expenses/all?perPage=3&curPage=3
+Authorization: {{auth.response.body.user.token}}
 
-### get expense of current user
-GET {{baseUrl}}/expense/123
-Authorization: {{login.response.body.user.token}}
+### get expense of current user or user id
+GET {{baseUrl}}/expenses/
+Authorization: {{auth.response.body.user.token}}
 
 ### create new expense for current user
-POST {{baseUrl}}/expense
-Authorization: {{login.response.body.user.token}}
+POST {{baseUrl}}/expenses
+Authorization: {{auth.response.body.user.token}}
 Content-Type: {{contentType}}
 
 {
@@ -65,10 +72,10 @@ Content-Type: {{contentType}}
 }
 
 ### update the existing expense of current user
-PATCH {{baseUrl}}/expense/id
+PATCH {{baseUrl}}/expenses/{{auth.response.body.user.id}}
 
 ### delete the expense of current user
-DELETE  {{baseUrl}}/expense/id
+DELETE  {{baseUrl}}/expenses/{{auth.response.body.user.id}}
 
 ### delete all expense of current user
-DELETE  {{baseUrl}}/expense/
+DELETE  {{baseUrl}}/expenses

@@ -2,13 +2,6 @@ import jwt from "jsonwebtoken";
 import UserModel from "../models/UserModel.js";
 import { compareSync } from "bcrypt";
 
-let userId = null;
-
-// check if user value gets reset after server restarts
-export const getLongUserId = () => {
-  return userId;
-};
-
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -23,9 +16,6 @@ export const login = async (req, res) => {
         error: "Invalid credentials",
       });
     }
-
-    // Set the userId variable
-    userId = user._id.toString();
 
     const payload = {
       email: email,
@@ -73,13 +63,10 @@ export const signup = async (req, res) => {
         lastName: lastName,
         email: email,
         password: password,
-        mobileNumber: mobile,
+        mobile: mobile,
         dob: dob,
         role: role
       });
-
-      // Set the userId
-      userId = newUser._id.toString();
 
       const payload = {
         email: email,
@@ -114,14 +101,10 @@ export const signup = async (req, res) => {
 };
 
 export const logout = (req, res) => {
-  userId = null
-
   const payload = {
     email: req.user.email,
     id: req.user.id
   }
-
-  console.log(payload)
 
   const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
     expiresIn: process.env.JWT_LOGOUT_TOKEN_EXPIRATION,
@@ -131,7 +114,7 @@ export const logout = (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Logout Successful",
-      accessToken: accessToken,
+      token: accessToken,
       cb: cb
     })
   })

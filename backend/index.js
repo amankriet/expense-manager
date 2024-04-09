@@ -28,6 +28,7 @@ fs.readdirSync(routersPath).map(async (file) => {
     app.use(path.join("/api/v1", file.split(".")[0]), router);
   }
 })
+// check res.http file for all available routes
 
 const port = process.env.PORT || 3002;
 

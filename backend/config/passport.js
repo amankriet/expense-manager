@@ -11,14 +11,14 @@ passport.use(
       let user = await UserModel.findById(jwt_payload.id);
 
       if (user) {
-        const { _id, firstName, lastName, email, mobileNumber, dob, role } = user;
+        const { _id, firstName, lastName, email, mobile, dob, role } = user;
 
         user = {
           id: _id,
           firstName: firstName,
           lastName: lastName,
           email: email,
-          mobileNumber: mobileNumber,
+          mobile: mobile,
           dob: dob,
           role: role
         };

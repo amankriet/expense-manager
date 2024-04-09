@@ -1,18 +1,18 @@
 import UserModel from "../models/UserModel.js";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat.js";
-import { getLongUserId } from "./auth.js";
+import { PAGINATION } from "../utils/common.js";
 
 dayjs.extend(localizedFormat);
 
 function userObj(user) {
-  const { _id, firstName, lastName, email, mobileNumber, dob, role } = user;
+  const { _id, firstName, lastName, email, mobile, dob, role } = user;
 
   const userData = {
     id: _id,
     name: `${firstName} ${lastName}`,
     email: email,
-    mobile: mobileNumber,
+    mobile: mobile,
     dob: dayjs(dob).format("LL"),
     role: role ? role : "user"
   };
@@ -29,8 +29,11 @@ export const getAllUsers = async (req, res) => {
     })
   }
 
+  const { perPage = PAGINATION.DEFAULT_PER_PAGE, curPage = PAGINATION.DEFAULT_PAGE } = req.query
+  const skipData = (curPage - 1) * perPage
+
   if (req.user.role == "admin") {
-    const users = await UserModel.find();
+    const users = await UserModel.find().skip(skipData).limit(perPage);
 
     if (!users) {
       return res.status(404).json({
@@ -64,8 +67,10 @@ export const getUser = async (req, res) => {
     })
   }
 
+  const requestedId = req.query.id
+
   try {
-    if (req.params.id == getLongUserId()) {
+    if (!requestedId) {
       if (req.user) {
         return res.status(200).json({
           success: true,
@@ -87,8 +92,8 @@ export const getUser = async (req, res) => {
       }
     }
 
-    if (req.user.role == "admin") {
-      const user = await UserModel.findById(req.params.id);
+    if (requestedId && req.user.role == "admin") {
+      const user = await UserModel.findById(requestedId);
       if (user) {
         return res.status(200).json({
           success: true,
@@ -127,11 +132,19 @@ export const updateUser = async (req, res) => {
     })
   }
 
-  const userID = req.params.id
+  if (Object.keys(req.body).length == 0) {
+    return res.status(404).json({
+      success: false,
+      message: "Empty or invalid request",
+      error: "Request body not found"
+    })
+  }
+
+  const requestedId = req.query.id
 
   try {
-    if (req.user.role == "admin") {
-      const user = await updateUserByID(req.body.id, req, true)
+    if (requestedId && req.user.role == "admin") {
+      const user = await updateUserByID(requestedId, req, true)
 
       if (req.error) {
         return res.status(403).json({
@@ -154,8 +167,8 @@ export const updateUser = async (req, res) => {
           error: "Something went wrong"
         })
       }
-    } else if (userID && req.body.id == userID) {
-      const user = await updateUserByID(userID, req, false)
+    } else if ((requestedId && req.user.id == requestedId) || !requestedId) {
+      const user = await updateUserByID(req.user.id, req, false)
 
       if (req.error) {
         return res.status(403).json({
@@ -195,8 +208,8 @@ export const updateUser = async (req, res) => {
 }
 
 async function updateUserByID(id, req, admin) {
-  const { firstName, lastName, email, mobileNumber, dob, role } = req.body;
-  const userID = req.params.id
+  const { role } = req.body;
+  const userID = req.user.id
 
   if (!admin && role == "admin") {
     req.error = "User role cannot be modified by user itself. Please contact admin"
@@ -206,9 +219,10 @@ async function updateUserByID(id, req, admin) {
   try {
     const result = await UserModel.findByIdAndUpdate(id, {
       $set: {
-        firstName: firstName,
-        lastName: lastName, email: email, mobileNumber: mobileNumber, dob: dob, role: role, lastUpdatedBy: userID
+        ...req.body, lastUpdatedBy: userID
       }
+    }, {
+      new: true
     })
 
     return userObj(result)
@@ -218,7 +232,7 @@ async function updateUserByID(id, req, admin) {
   }
 }
 
-export const deleteUserByID = async (req, res) => {
+export const deleteUser = async (req, res) => {
   if (req.error) {
     return res.status(401).json({
       success: false,
@@ -227,9 +241,11 @@ export const deleteUserByID = async (req, res) => {
     })
   }
 
+  const requestedId = req.query.id
+
   try {
-    if (req.params.id && req.user.role == "admin") {
-      const result = await UserModel.findByIdAndDelete(req.params.id)
+    if (requestedId && req.user.role == "admin") {
+      const result = await UserModel.findByIdAndDelete(requestedId)
 
       if (result) {
         return res.status(200).json({
@@ -244,18 +260,28 @@ export const deleteUserByID = async (req, res) => {
           error: "Not found! Please check the user id you wish to delete"
         })
       }
-    } else if (!req.params.id) {
-      return res.status(400).json({
-        success: false,
-        message: "Bad request!",
-        error: "Missing user id in params"
-      })
-    } else if (req.user.role == "user") {
+    } else if (requestedId && req.user.role == "user") {
       return res.status(403).json({
         success: false,
         message: "Missing admin priviliges",
         error: "Forbidden! Please login with admin account and request again"
       })
+    } else if (!requestedId) {
+      const result = await UserModel.findByIdAndDelete(req.user.id)
+
+      if (result) {
+        return res.status(200).json({
+          success: true,
+          message: "User data deleted successfully",
+          user: userObj(result)
+        })
+      } else {
+        return res.status(404).json({
+          success: false,
+          message: "User data not found",
+          error: "Not found! Please check the user id you wish to delete"
+        })
+      }
     }
   } catch (error) {
     return res.status(500).json({
