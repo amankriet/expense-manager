@@ -4,3 +4,5 @@ export const PAGINATION = {
 }
 
 export const DEFAULT_USER_ROLE = "user"
+
+export const excludedFields = "-userId -password -lastUpdatedBy -createdAt -updatedAt -__v"

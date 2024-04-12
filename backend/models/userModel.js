@@ -33,19 +33,32 @@ const UserSchema = new Schema(
       type: String,
       required: false,
       maxLength: 30,
-      default: "asas"
+      default: "user"
     },
     lastUpdatedBy: {
       type: Types.ObjectId,
       default: null
     }
   },
+  { id: false },
   { timestamps: true }
 );
 
 UserSchema.pre("save", function (next) {
   this.password = hashSync(this.password, 10)
   next()
+})
+
+UserSchema.virtual("fullName").get(function () {
+  return `${this.firstName} ${this.lastName}`
+})
+
+UserSchema.set('toObject', {
+  virtuals: true
+})
+
+UserSchema.set('toJSON', {
+  virtuals: true
 })
 
 const UserModel = model("UserModel", UserSchema);

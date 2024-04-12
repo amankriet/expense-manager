@@ -1,24 +1,9 @@
 import UserModel from "../models/UserModel.js";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat.js";
-import { PAGINATION } from "../utils/common.js";
+import { PAGINATION, excludedFields } from "../utils/common.js";
 
 dayjs.extend(localizedFormat);
-
-function userObj(user) {
-  const { _id, firstName, lastName, email, mobile, dob, role } = user;
-
-  const userData = {
-    id: _id,
-    name: `${firstName} ${lastName}`,
-    email: email,
-    mobile: mobile,
-    dob: dayjs(dob).format("LL"),
-    role: role ? role : "user"
-  };
-
-  return userData;
-}
 
 export const getAllUsers = async (req, res) => {
   if (req.error) {
@@ -33,7 +18,9 @@ export const getAllUsers = async (req, res) => {
   const skipData = (curPage - 1) * perPage
 
   if (req.user.role == "admin") {
-    const users = await UserModel.find().skip(skipData).limit(perPage);
+    const users = await UserModel.find().skip(skipData)
+      .limit(perPage)
+      .select(excludedFields)
 
     if (!users) {
       return res.status(404).json({
@@ -44,9 +31,7 @@ export const getAllUsers = async (req, res) => {
     } else {
       return res.status(200).json({
         success: true,
-        users: users.map((user) => {
-          return userObj(user);
-        }),
+        users
       });
     }
   } else {
@@ -70,12 +55,12 @@ export const getUser = async (req, res) => {
   const requestedId = req.query.id
 
   try {
-    if (!requestedId) {
+    if (!requestedId || (requestedId && requestedId == req.user.id)) {
       if (req.user) {
         return res.status(200).json({
           success: true,
           message: "User Found",
-          user: userObj(req.user)
+          user: req.user
         })
       } else if (req.error) {
         return res.status(404).json({
@@ -93,12 +78,14 @@ export const getUser = async (req, res) => {
     }
 
     if (requestedId && req.user.role == "admin") {
-      const user = await UserModel.findById(requestedId);
+      const user = await UserModel.findById(requestedId)
+        .select(excludedFields)
+
       if (user) {
         return res.status(200).json({
           success: true,
           message: "User found",
-          user: userObj(user)
+          user
         });
       } else {
         return res.status(404).json({
@@ -158,7 +145,7 @@ export const updateUser = async (req, res) => {
         return res.status(200).json({
           success: true,
           message: "User data update successful",
-          user: user
+          user
         })
       } else {
         return res.status(500).json({
@@ -182,7 +169,7 @@ export const updateUser = async (req, res) => {
         return res.status(200).json({
           success: true,
           message: "User data update successful",
-          user: user
+          user
         })
       } else {
         return res.status(500).json({
@@ -223,9 +210,9 @@ async function updateUserByID(id, req, admin) {
       }
     }, {
       new: true
-    })
+    }).select(excludedFields)
 
-    return userObj(result)
+    return result
   } catch (error) {
     req.error = error
     return
@@ -243,45 +230,35 @@ export const deleteUser = async (req, res) => {
 
   const requestedId = req.query.id
 
+  if (requestedId && req.user.role == "user" && requestedId != req.user.id) {
+    return res.status(403).json({
+      success: false,
+      message: "Missing admin priviliges",
+      error: "Forbidden! Please login with admin account and request again"
+    })
+  }
+
   try {
+    let user
+
     if (requestedId && req.user.role == "admin") {
-      const result = await UserModel.findByIdAndDelete(requestedId)
+      user = await deleteUserById(requestedId)
+    } else {
+      user = await deleteUserById(req.user.id)
+    }
 
-      if (result) {
-        return res.status(200).json({
-          success: true,
-          message: "User data deleted successfully",
-          user: userObj(result)
-        })
-      } else {
-        return res.status(404).json({
-          success: false,
-          message: "User data not found",
-          error: "Not found! Please check the user id you wish to delete"
-        })
-      }
-    } else if (requestedId && req.user.role == "user") {
-      return res.status(403).json({
-        success: false,
-        message: "Missing admin priviliges",
-        error: "Forbidden! Please login with admin account and request again"
+    if (user) {
+      return res.status(200).json({
+        success: true,
+        message: "User data deleted successfully",
+        user
       })
-    } else if (!requestedId) {
-      const result = await UserModel.findByIdAndDelete(req.user.id)
-
-      if (result) {
-        return res.status(200).json({
-          success: true,
-          message: "User data deleted successfully",
-          user: userObj(result)
-        })
-      } else {
-        return res.status(404).json({
-          success: false,
-          message: "User data not found",
-          error: "Not found! Please check the user id you wish to delete"
-        })
-      }
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: "User data not found",
+        error: "Not found! Please check the user id you wish to delete"
+      })
     }
   } catch (error) {
     return res.status(500).json({
@@ -290,4 +267,9 @@ export const deleteUser = async (req, res) => {
       error: error.toString()
     })
   }
+}
+
+async function deleteUserById(id) {
+  return UserModel.findByIdAndDelete(id)
+    .select(excludedFields)
 }

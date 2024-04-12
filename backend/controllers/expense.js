@@ -1,41 +1,28 @@
 import ExpenseModel from "../models/ExpenseModel.js"
-import { PAGINATION } from "../utils/common.js"
-
-const getExpenseObj = (expense) => {
-    // remove some default and other extra data from the response
-    return {
-        "id": expense._id,
-        "title": expense.title,
-        "amount": expense.amount,
-        "type": expense.type,
-        "date": expense.date,
-        "category": expense.category,
-        "description": expense.description
-    }
-}
+import { PAGINATION, excludedFields } from "../utils/common.js"
 
 export const addExpense = async (req, res) => {
     try {
         const expense = await ExpenseModel.create({
             userId: req.user.id,
             ...req.body
-        })
+        }).select(excludedFields)
 
         if (expense) {
-            res.status(201).json({
+            return res.status(201).json({
                 success: true,
                 message: "User expense added successfully",
-                expense: getExpenseObj(expense)
+                expense
             })
         } else {
-            res.status(500).json({
+            return res.status(500).json({
                 success: false,
                 message: "Failed to add user expense",
                 error: "Something went wrong"
             })
         }
     } catch (error) {
-        res.status(400).json({
+        return res.status(400).json({
             success: false,
             message: "Failed to add user expense",
             error: error.toString()
@@ -45,7 +32,7 @@ export const addExpense = async (req, res) => {
 
 export const getAllExpenses = async (req, res) => {
     if (req.error) {
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: "Something went wrong",
             error: req.error.toString()
@@ -55,25 +42,29 @@ export const getAllExpenses = async (req, res) => {
     const { perPage = PAGINATION.DEFAULT_PER_PAGE, curPage = PAGINATION.DEFAULT_PAGE } = req.query
     const skipData = perPage * (curPage - 1)
     try {
-        const expenses = await ExpenseModel.find({ userId: req.user.id }).skip(skipData).limit(perPage)
+        const expenses = await ExpenseModel
+            .find({ userId: req.user.id })
+            .skip(skipData)
+            .limit(perPage)
+            .select(excludedFields)
 
         if (expenses.length > 0) {
             // send out filtered data after removing unnecesary data
-            res.status(200).json({
+            return res.status(200).json({
                 success: true,
                 message: "User expenses found",
-                expenses: expenses.map(expense => getExpenseObj(expense))
+                expenses: expenses
             })
         } else {
             // send out filtered data after removing unnecesary data
-            res.status(200).json({
+            return res.status(200).json({
                 success: false,
                 message: "Please start by adding some expenses",
                 error: "No expenses found"
             })
         }
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: "Something went wrong",
             error: error.toString()
@@ -83,7 +74,7 @@ export const getAllExpenses = async (req, res) => {
 
 export const getExpense = async (req, res) => {
     if (req.error) {
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: "Something went wrong",
             error: req.error.toString()
@@ -93,7 +84,7 @@ export const getExpense = async (req, res) => {
     const expenseid = req.query.id
 
     if (!expenseid) {
-        res.status(400).json({
+        return res.status(400).json({
             success: false,
             message: "Invalid request. Please select an expense to fetch",
             error: "Invalid request. Missing expense id"
@@ -102,25 +93,64 @@ export const getExpense = async (req, res) => {
 
     try {
         const expense = await ExpenseModel.findById(expenseid)
+            .select(excludedFields)
 
         if (expense) {
-            res.status(200).json({
+            return res.status(200).json({
                 success: true,
                 message: "Expense details found",
-                expense: getExpenseObj(expense)
+                expense
             })
         } else {
-            res.status(404).json({
+            return res.status(404).json({
                 success: false,
                 message: "Expense not found. Please try again",
                 error: "Expense not found. Invalid expense id"
             })
         }
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: "Something went wrong",
-            error
+            error: error.toString()
         })
     }
+}
+
+export const updateExpense = async (req, res) => {
+    if (req.error) {
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong",
+            error: req.error.toString()
+        })
+    }
+
+    const expenseid = req.query.id
+
+    console.log(expenseid)
+
+    return res.status(200).json({
+        success: true,
+        message: `Update expense ${req.params.id} data`
+    })
+}
+
+export const deleteExpense = async (req, res) => {
+    if (req.error) {
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong",
+            error: req.error.toString()
+        })
+    }
+
+    const expenseid = req.query.id
+
+    console.log(expenseid)
+
+    res.status(200).json({
+        success: true,
+        message: `Delete expense ${req.params.id} data`
+    })
 }

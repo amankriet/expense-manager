@@ -47,7 +47,7 @@ Content-Type: {{contentType}}
 }
 
 ### delete current user or user id
-DELETE {{baseUrl}}/users
+DELETE {{baseUrl}}/users?id=66159f334180d2a1a6fa2b73
 Authorization: {{auth.response.body.user.token}}
 
 ### get all expenses of current user
@@ -55,7 +55,7 @@ GET {{baseUrl}}/expenses/all?perPage=3&curPage=3
 Authorization: {{auth.response.body.user.token}}
 
 ### get expense of current user or user id
-GET {{baseUrl}}/expenses/
+GET {{baseUrl}}/expenses?id=660ee74f548451accf013d35
 Authorization: {{auth.response.body.user.token}}
 
 ### create new expense for current user
@@ -72,10 +72,10 @@ Content-Type: {{contentType}}
 }
 
 ### update the existing expense of current user
-PATCH {{baseUrl}}/expenses/{{auth.response.body.user.id}}
+PATCH {{baseUrl}}/expenses
 
 ### delete the expense of current user
-DELETE  {{baseUrl}}/expenses/{{auth.response.body.user.id}}
+DELETE  {{baseUrl}}/expenses
 
 ### delete all expense of current user
 DELETE  {{baseUrl}}/expenses
