@@ -39,13 +39,13 @@ export const getAllExpenses = async (req, res) => {
         })
     }
 
-    const { perPage = PAGINATION.DEFAULT_PER_PAGE, curPage = PAGINATION.DEFAULT_PAGE } = req.query
-    const skipData = perPage * (curPage - 1)
+    const { limit = PAGINATION.DEFAULT_LIMIT, page = PAGINATION.DEFAULT_PAGE } = req.query
+    const skipData = limit * (page - 1)
     try {
         const expenses = await ExpenseModel
             .find({ userId: req.user.id })
             .skip(skipData)
-            .limit(perPage)
+            .limit(limit)
             .select(excludedFields)
 
         if (expenses.length > 0) {

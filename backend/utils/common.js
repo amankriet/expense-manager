@@ -1,5 +1,5 @@
 export const PAGINATION = {
-    DEFAULT_PER_PAGE: 5,
+    DEFAULT_LIMIT: 5,
     DEFAULT_PAGE: 1
 }
 

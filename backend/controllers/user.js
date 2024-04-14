@@ -14,12 +14,12 @@ export const getAllUsers = async (req, res) => {
     })
   }
 
-  const { perPage = PAGINATION.DEFAULT_PER_PAGE, curPage = PAGINATION.DEFAULT_PAGE } = req.query
-  const skipData = (curPage - 1) * perPage
+  const { limit = PAGINATION.DEFAULT_LIMIT, page = PAGINATION.DEFAULT_PAGE } = req.query
+  const skipData = (page - 1) * limit
 
   if (req.user.role == "admin") {
     const users = await UserModel.find().skip(skipData)
-      .limit(perPage)
+      .limit(limit)
       .select(excludedFields)
 
     if (!users) {
