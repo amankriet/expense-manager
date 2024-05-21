@@ -3,6 +3,8 @@ export const PAGINATION = {
     DEFAULT_PAGE: 1
 }
 
+export const ERROR_LOGS_FILE = 'errLogs.txt'
+
 export const DEFAULT_USER_ROLE = "user"
 
-export const excludedFields = "-userId -password -lastUpdatedBy -createdAt -updatedAt -__v"
+export const EXCLUDED_FIELDS = "-userId -password -lastUpdatedBy -createdAt -updatedAt -__v"

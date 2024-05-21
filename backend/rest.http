@@ -11,6 +11,8 @@ Content-Type: {{contentType}}
     "password": "password2"
 }
 
+> {% client.global.set("accessToken", response.body.user.accessToken); %}
+
 ### signup
 POST {{baseUrl}}/auth/signup
 Content-Type: {{contentType}}
@@ -27,19 +29,28 @@ Content-Type: {{contentType}}
 ### logout
 # @name auth
 GET {{baseUrl}}/auth/logout
-Authorization: {{auth.response.body.user.token}}
+Authorization: {{accessToken}}
+
+> {% client.global.set("accessToken", response.body.token); %}
+
+### Refresh Token
+# @name refreshToken
+GET {{baseUrl}}/auth/refresh-token
+Authorization: {{accessToken}}
+
+> {% client.global.set("accessToken", response?.body?.accessToken); %}
 
 ### get all users details
 GET {{baseUrl}}/users/all?page=1&limit=10
-Authorization: {{auth.response.body.user.token}}
+Authorization: {{accessToken}}
 
 ### get current user or user id details
 GET {{baseUrl}}/users?id=65faf91627523044e548b12b
-Authorization: {{auth.response.body.user.token}}
+Authorization: {{accessToken}}
 
 ### update current user or user id data
 PATCH {{baseUrl}}/users?id=65faf91627523044e548b12b
-Authorization: {{auth.response.body.user.token}}
+Authorization: {{accessToken}}
 Content-Type: {{contentType}}
 
 {

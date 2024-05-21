@@ -1,7 +1,7 @@
 import UserModel from "../models/UserModel.js";
 import dayjs from "dayjs";
-import localizedFormat from "dayjs/plugin/localizedFormat.js";
-import { PAGINATION, excludedFields } from "../utils/common.js";
+import localizedFormat from 'dayjs/plugin/localizedFormat.js';
+import {EXCLUDED_FIELDS, PAGINATION} from "../utils/common.js";
 
 dayjs.extend(localizedFormat);
 
@@ -20,7 +20,7 @@ export const getAllUsers = async (req, res) => {
   if (req.user.role == "admin") {
     const users = await UserModel.find().skip(skipData)
       .limit(limit)
-      .select(excludedFields)
+      .select(EXCLUDED_FIELDS)
 
     if (!users) {
       return res.status(404).json({
@@ -55,7 +55,7 @@ export const getUser = async (req, res) => {
   const requestedId = req.query.id
 
   try {
-    if (!requestedId || (requestedId && requestedId == req.user.id)) {
+    if (!requestedId || requestedId && requestedId === req.user.id) {
       if (req.user) {
         return res.status(200).json({
           success: true,
@@ -77,9 +77,9 @@ export const getUser = async (req, res) => {
       }
     }
 
-    if (requestedId && req.user.role == "admin") {
+    if (requestedId && req.user.role === "admin") {
       const user = await UserModel.findById(requestedId)
-        .select(excludedFields)
+        .select(EXCLUDED_FIELDS)
 
       if (user) {
         return res.status(200).json({
@@ -119,7 +119,7 @@ export const updateUser = async (req, res) => {
     })
   }
 
-  if (Object.keys(req.body).length == 0) {
+  if (Object.keys(req.body).length === 0) {
     return res.status(404).json({
       success: false,
       message: "Empty or invalid request",
@@ -130,7 +130,7 @@ export const updateUser = async (req, res) => {
   const requestedId = req.query.id
 
   try {
-    if (requestedId && req.user.role == "admin") {
+    if (requestedId && req.user.role === "admin") {
       const user = await updateUserByID(requestedId, req, true)
 
       if (req.error) {
@@ -154,7 +154,7 @@ export const updateUser = async (req, res) => {
           error: "Something went wrong"
         })
       }
-    } else if ((requestedId && req.user.id == requestedId) || !requestedId) {
+    } else if (requestedId && req.user.id == requestedId || !requestedId) {
       const user = await updateUserByID(req.user.id, req, false)
 
       if (req.error) {
@@ -198,24 +198,22 @@ async function updateUserByID(id, req, admin) {
   const { role } = req.body;
   const userID = req.user.id
 
-  if (!admin && role == "admin") {
+  if (!admin && role === "admin") {
     req.error = "User role cannot be modified by user itself. Please contact admin"
     return
   }
 
   try {
-    const result = await UserModel.findByIdAndUpdate(id, {
+    return await UserModel.findByIdAndUpdate(id, {
       $set: {
         ...req.body, lastUpdatedBy: userID
-      }
+      },
+      $currentDate: { lastModified: true }
     }, {
       new: true
-    }).select(excludedFields)
-
-    return result
+    }).select(EXCLUDED_FIELDS)
   } catch (error) {
     req.error = error
-    return
   }
 }
 
@@ -230,10 +228,10 @@ export const deleteUser = async (req, res) => {
 
   const requestedId = req.query.id
 
-  if (requestedId && req.user.role == "user" && requestedId != req.user.id) {
+  if (requestedId && req.user.role === "user" && requestedId !== req.user.id) {
     return res.status(403).json({
       success: false,
-      message: "Missing admin priviliges",
+      message: "Missing admin privileges",
       error: "Forbidden! Please login with admin account and request again"
     })
   }
@@ -241,7 +239,7 @@ export const deleteUser = async (req, res) => {
   try {
     let user
 
-    if (requestedId && req.user.role == "admin") {
+    if (requestedId && req.user.role === "admin") {
       user = await deleteUserById(requestedId)
     } else {
       user = await deleteUserById(req.user.id)
@@ -271,5 +269,5 @@ export const deleteUser = async (req, res) => {
 
 async function deleteUserById(id) {
   return UserModel.findByIdAndDelete(id)
-    .select(excludedFields)
+    .select(EXCLUDED_FIELDS)
 }

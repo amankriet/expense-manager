@@ -1,33 +1,25 @@
 import mongoose from "mongoose";
+import logger from "../middlewares/logger.js";
 
 main().catch((err) => console.log(err));
 
 mongoose.connection.on("connected", function () {
   console.log("Mongoose connection done")
-
-  // const Admin = mongoose.mongo.Admin;
-
-  // // Use the Admin object to list the databases
-  // const admin = new Admin(mongoose.connections[0].db);
-
-  // admin.listDatabases((err, databases) => {
-  //   if (err) {
-  //     console.error(err);
-  //   } else {
-  //     console.log(databases);
-  //   }
-
-  //   // Close the connection
-  //   mongoose.connection.close();
-  // });
+  logger('Mongoose connection done')
 })
 
 mongoose.connection.on("error", function (error) {
   console.log(`Mongoose connection error: ${error}`)
+  logger(`Mongoose connection error: ${error}`, 'errorLogs.txt')
 })
 
 mongoose.connection.on("disconnected", function () {
-  mongoose.connection.close()
+  mongoose.connection
+      .close()
+      .then(r => {
+    console.log("Mongoose connection disconnected")
+    logger('Mongoose connection disconnected')
+  })
 })
 
 async function main() {

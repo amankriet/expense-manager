@@ -1,12 +1,12 @@
 import ExpenseModel from "../models/ExpenseModel.js"
-import { PAGINATION, excludedFields } from "../utils/common.js"
+import { PAGINATION, EXCLUDED_FIELDS } from "../utils/common.js"
 
 export const addExpense = async (req, res) => {
     try {
         const expense = await ExpenseModel.create({
             userId: req.user.id,
             ...req.body
-        }).select(excludedFields)
+        }).select(EXCLUDED_FIELDS)
 
         if (expense) {
             return res.status(201).json({
@@ -46,7 +46,7 @@ export const getAllExpenses = async (req, res) => {
             .find({ userId: req.user.id })
             .skip(skipData)
             .limit(limit)
-            .select(excludedFields)
+            .select(EXCLUDED_FIELDS)
 
         if (expenses.length > 0) {
             // send out filtered data after removing unnecesary data
@@ -93,7 +93,7 @@ export const getExpense = async (req, res) => {
 
     try {
         const expense = await ExpenseModel.findById(expenseid)
-            .select(excludedFields)
+            .select(EXCLUDED_FIELDS)
 
         if (expense) {
             return res.status(200).json({
