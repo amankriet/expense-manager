@@ -121,19 +121,9 @@ export const signup = async (req, res) => {
 };
 
 export const logout = (req, res) => {
-    const payload = {
-        email: req.user.email,
-        id: req.user.id
-    }
-
-    const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
-        expiresIn: process.env.JWT_LOGOUT_TOKEN_EXPIRATION,
-    });
-
     req.logout(() => res.status(200).json({
             success: true,
             message: "Logout Successful",
-            token: accessToken
         })
     )
 }
@@ -171,7 +161,7 @@ export const handleRefreshToken = async (req, res) => {
             message: "New Access Token generated",
             user: {
                 id: req.user._id,
-                name: `${user.firstName} ${req.user.lastName}`,
+                name: `${req.user.firstName} ${req.user.lastName}`,
                 accessToken: `Bearer ${accessToken}`
             }
         });
