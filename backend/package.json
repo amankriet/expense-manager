@@ -6,8 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "nodemon -r dotenv/config index.js",
-    "build": "npm i",
-    "preinstall": "npx force-resolutions"
+    "build": "npm i"
   },
   "keywords": [],
   "author": "",
@@ -26,8 +25,5 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "uuid": "^9.0.1"
-  },
-  "resolutions": {
-    "path-to-regexp": "^8.1.0"
   }
 }

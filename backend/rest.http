@@ -7,8 +7,8 @@ POST {{baseUrl}}/auth/login
 Content-Type: {{contentType}}
 
 {
-    "email": "amankriet@gmail.com",
-    "password": "password2"
+    "email": "dhruv@gmail.com",
+    "password": "dhruv"
 }
 
 > {% client.global.set("accessToken", response.body.user.accessToken); %}
@@ -45,7 +45,7 @@ GET {{baseUrl}}/users/all?page=1&limit=10
 Authorization: {{accessToken}}
 
 ### get current user or user id details
-GET {{baseUrl}}/users?id=65faf91627523044e548b12b
+GET {{baseUrl}}/users?id=676c791fe9be371709d762a9
 Authorization: {{accessToken}}
 
 ### update current user or user id data

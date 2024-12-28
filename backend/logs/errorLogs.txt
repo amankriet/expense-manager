@@ -1,0 +1,3 @@
+2024-12-26 12:08:15	337fa9a1-a8ab-4a8a-ae06-a6ff8aa1b515	Mongoose connection error: MongoServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017
+2024-12-26 12:31:30	369ddb7c-2be3-4bb1-9341-7cd276b16eb8	Mongoose connection error: MongoServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017
+2024-12-26 12:49:11	8a389c93-f1aa-4e82-93e1-a3c5257f57e2	Mongoose connection error: MongoServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017
