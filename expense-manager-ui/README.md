@@ -1,69 +1,103 @@
-# React + TypeScript + Vite
+# Expense Manager – UI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend for the Expense Manager application (React + TypeScript).
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🛠 Tech Stack
 
-## Expanding the ESLint configuration
+- React 18 + Vite
+- TypeScript
+- Yarn 1.22
+- Styled-components (with ThemeProvider)
+- React Router
+- React Query
+- ESLint / Prettier
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🚀 Getting Started
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+yarn install
+yarn dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 📁 Current Folder Structure
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+src/
+├── App.tsx
+├── main.tsx
+├── theme/
+│   └── index.ts            # ThemeProvider config
+├── styled-components.d.ts  # TypeScript theme augmentation
+├── components/
+│   └── ExpenseCard.tsx
+├── pages/
+├── features/
+├── hooks/
+├── types/
+├── utils/
+└── lib/
+
+---
+
+## ⚙️ Configurations
+
+| Item                               | Status                   |
+| ---------------------------------- | ------------------------ |
+| ESLint + Prettier                  | ✅ configured             |
+| Theme Provider (styled-components) | ✅ added                  |
+| Routing                            | ⚠️ pending (coming next) |
+| React Query                        | ⚠️ pending               |
+| Docker                             | ❌ not added yet          |
+| CI / GitHub Workflow               | ❌ not added yet          |
+
+---
+
+## ✅ Available Scripts
+
+| Command        | Description              |
+| -------------- | ------------------------ |
+| `yarn dev`     | Start dev server         |
+| `yarn build`   | Build for production     |
+| `yarn preview` | Preview production build |
+
+
+---
+
+## 📌 Roadmap
+
+### 🔹 Phase 1 — Foundation
+- [x] Scaffold project (React + Vite + TS + Yarn)
+- [x] Set up ESLint / Prettier
+- [x] Add styled-components + ThemeProvider
+- [x] Define base folder structure
+- [ ] Add React Router + layout
+- [ ] Add React Query
+
+### 🔹 Phase 2 — Core Features
+- [ ] **Expense List Page**
+  - [ ] Fetch expenses from backend
+  - [ ] Display table
+  - [ ] View expense details
+- [ ] **Add Expense Page**
+  - [ ] Form with validation
+  - [ ] Submit to backend
+- [ ] **Category Management**
+  - [ ] CRUD categories
+
+### 🔹 Phase 3 — Enhancements
+- [ ] Dashboard (charts & summaries)
+- [ ] Form validation (Zod / Yup)
+- [ ] Error handling & toast notifications
+- [ ] User settings (e.g. currency, theme)
+
+### 🔹 Phase 4 — Production Readiness
+- [ ] Dockerfile for backend + frontend
+- [ ] GitHub Actions (build / lint)
+- [ ] Error tracking (Sentry)
+- [ ] Analytics (PostHog / GA)
+- [ ] Deploy: FE → Vercel  |  BE → AWS / Render
