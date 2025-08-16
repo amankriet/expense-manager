@@ -1,15 +1,15 @@
 import jwt from "jsonwebtoken"
 import UserModel from "../models/UserModel.js"
-import {compareSync} from "bcrypt"
-import {ERROR_LOGS_FILE, EXCLUDED_FIELDS} from "../utils/common.js"
+import { compareSync } from "@node-rs/bcrypt"
+import { ERROR_LOGS_FILE, EXCLUDED_FIELDS } from "../utils/common.js"
 import logger from "../middlewares/logger.js";
 
 export const login = async (req, res) => {
-    const {email, password} = req.body
+    const { email, password } = req.body
 
     try {
         // Find user by email
-        const user = await UserModel.findOne({email});
+        const user = await UserModel.findOne({ email });
 
         if (!user || !compareSync(password, user.password)) {
             return res.status(401).json({
@@ -37,14 +37,14 @@ export const login = async (req, res) => {
                 refreshToken,
                 lastUpdatedBy: user._id
             },
-            $currentDate: {lastModified: true}
+            $currentDate: { lastModified: true }
         }, {
             new: true
         }).select(EXCLUDED_FIELDS)
 
-        console.log('loginData:',loginData)
+        console.log('loginData:', loginData)
 
-        res.cookie("jwt", refreshToken, {httpOnly: true, maxAge: 30 * 60 * 60 * 1000})
+        res.cookie("jwt", refreshToken, { httpOnly: true, maxAge: 30 * 60 * 60 * 1000 })
 
         return res.status(200).json({
             success: true,
@@ -65,11 +65,11 @@ export const login = async (req, res) => {
 }
 
 export const signup = async (req, res) => {
-    const {firstName, lastName, email, password, mobile, dob, role} = req.body;
+    const { firstName, lastName, email, password, mobile, dob, role } = req.body;
 
     try {
         // check if user already exists
-        const existingUser = await UserModel.findOne({email});
+        const existingUser = await UserModel.findOne({ email });
         if (existingUser) {
             return res.status(409).json({
                 success: false,
@@ -122,15 +122,15 @@ export const signup = async (req, res) => {
 
 export const logout = (req, res) => {
     req.logout(() => res.status(200).json({
-            success: true,
-            message: "Logout Successful",
-        })
+        success: true,
+        message: "Logout Successful",
+    })
     )
 }
 
 export const handleRefreshToken = async (req, res) => {
 
-    console.log('refresh',req.cookies)
+    console.log('refresh', req.cookies)
 
     if (req.error) {
         return res.status(401).json({
@@ -166,7 +166,7 @@ export const handleRefreshToken = async (req, res) => {
             }
         });
     } catch (error) {
-        logger(handleRefreshToken.name+': '+error.toString(), ERROR_LOGS_FILE);
+        logger(handleRefreshToken.name + ': ' + error.toString(), ERROR_LOGS_FILE);
         return res.status(500).json({
             success: false,
             message: "Something went wrong",

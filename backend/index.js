@@ -7,7 +7,7 @@ import path from "path"
 import fs from "fs"
 import cookieParser from "cookie-parser"
 import logger from "./middlewares/logger.js"
-import {ERROR_LOGS_FILE} from "./utils/common.js";
+import { ERROR_LOGS_FILE } from "./utils/common.js";
 
 const __dirname = path.resolve()
 
@@ -21,7 +21,6 @@ const corsOptionsDelegate = function (req, callback) {
     } else {
         corsOptions = { origin: false } // disable CORS for this request
     }
-    console.log('corsOption',corsOptions)
     callback(null, corsOptions) // callback expects two parameters: error and options
 }
 
@@ -35,7 +34,7 @@ app.use(passport.initialize())
 const routersPath = path.join(__dirname, "routes")
 
 try {
-// read all files in the "/routes" directory
+    // read all files in the "/routes" directory
     fs.readdirSync(routersPath).map(async (file) => {
         if (file.endsWith("js")) {
             // dynamically import the router module
@@ -48,7 +47,7 @@ try {
             app.use(path.join("/api/v1", file.split(".")[0]), router)
         }
     })
-// check res.http file for all available routes
+    // check res.http file for all available routes
 } catch (err) {
     console.error(err)
     logger(`${err.name}: ${err.message}`, ERROR_LOGS_FILE)

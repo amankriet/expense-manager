@@ -13,7 +13,10 @@ frontend/build
 .env.test.local
 .env.production.local
 backend/.env
-frontend/.env
+expense-manager-ui/.env
+expense-manager-ui/.env.development
+expense-manager-ui/.env.production
+expense-manager-ui/.env.test
 
 npm-debug.log*
 yarn-debug.log*
