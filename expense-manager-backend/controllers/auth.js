@@ -28,7 +28,7 @@ export const login = async (req, res) => {
             expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION,
         });
 
-        const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_TOKEN_EXPIRATION, {
+        const refreshToken = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
             expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRATION,
         });
 
@@ -44,14 +44,25 @@ export const login = async (req, res) => {
 
         console.log('loginData:', loginData)
 
-        res.cookie("jwt", refreshToken, { httpOnly: true, maxAge: 30 * 60 * 60 * 1000 })
+        res.cookie("jwt", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production', // Set secure flag in production 
+            sameSite: "strict",
+            maxAge: 30 * 60 * 60 * 1000
+        })
 
         return res.status(200).json({
             success: true,
             message: "Login successful",
             user: {
                 id: user._id,
+                email: user.email,
+                mobile: user.mobile,
+                dob: user.dob,
                 name: `${user.firstName} ${user.lastName}`,
+                role: user.role
+            },
+            tokens: {
                 accessToken: `Bearer ${accessToken}`
             }
         });
@@ -146,22 +157,50 @@ export const handleRefreshToken = async (req, res) => {
         })
     }
 
-    const payload = {
-        email: req.user.email,
-        id: req.user._id,
-    };
-
     try {
+        const payload = {
+            email: req.user.email,
+            id: req.user._id,
+        };
+
+        // Generate new access token
         const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
             expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION,
         });
+
+        // Generate new refresh token
+        const refreshToken = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
+            expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRATION,
+        });
+
+        // Update refresh token in DB
+        await UserModel.findByIdAndUpdate(req.user._id, {
+            $set: {
+                refreshToken,
+                lastUpdatedBy: req.user._id
+            },
+            $currentDate: { lastModified: true }
+        });
+
+        // Send new refresh token as cookie
+        res.cookie("jwt", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production', // Set secure flag in production
+            sameSite: "strict",
+            maxAge: 30 * 60 * 60 * 1000
+        })
 
         return res.status(200).json({
             success: true,
             message: "New Access Token generated",
             user: {
                 id: req.user._id,
-                name: `${req.user.firstName} ${req.user.lastName}`,
+                email: req.user.email,
+                mobile: req.user.mobile,
+                dob: req.user.dob,
+                name: `${req.user.firstName} ${req.user.lastName}`
+            },
+            tokens: {
                 accessToken: `Bearer ${accessToken}`
             }
         });

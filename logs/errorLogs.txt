@@ -1,0 +1,2 @@
+2025-08-31 04:17:35	4b9523d0-af37-4266-bd74-fa785e2f0ce6	Mongoose connection error: MongoServerSelectionError: C02064FA01000000:error:0A000438:SSL routines:ssl3_read_bytes:tlsv1 alert internal error:../deps/openssl/openssl/ssl/record/rec_layer_s3.c:1605:SSL alert number 80
+

@@ -25,3 +25,8 @@ yarn-error.log*
 # ide settings
 .idea
 .vscode
+
+# env
+.env
+expense-manager-backend/.env
+expense-manager-ui/.env
