@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "cd expense-manager-backend && yarn start",
-    "client": "cd expense-manager-ui && yarn dev"
+    "server": "cd server && yarn start",
+    "client": "cd client && yarn dev"
   },
   "keywords": [
     "Expense Manager",
