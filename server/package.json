@@ -5,12 +5,19 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon -r dotenv/config index.js",
-    "build": "npm i"
+    "start": "nodemon ./start.js",
+    "build": "npm i",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "mongodb-memory-server": "^9.1.1"
+  },
   "dependencies": {
     "@node-rs/bcrypt": "^1.10.7",
     "cookie-parser": "^1.4.6",
