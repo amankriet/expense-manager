@@ -1,16 +1,15 @@
-import {ExtractJwt, Strategy as JwtStrategy} from "passport-jwt"
+import { ExtractJwt, Strategy as JwtStrategy } from "passport-jwt"
 import UserModel from "../models/UserModel.js"
 import passport from "passport"
-import {ERROR_LOGS_FILE, EXCLUDED_FIELDS} from "../utils/common.js"
+import { ERROR_LOGS_FILE, EXCLUDED_FIELDS } from "../utils/common.js"
 import logger from "../middlewares/logger.js";
 
 const cookieExtractor = function (req) {
     let token = null;
-    console.log('cookieReq',req.cookies['jwt'])
     if (req && req.cookies) {
         token = req.cookies['jwt'];
     }
-    console.log('token',token)
+    console.log('token', token)
     return token;
 };
 
