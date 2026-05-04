@@ -4,12 +4,8 @@ import logger from "../middlewares/logger.js";
 export async function connectDB() {
   try {
     await mongoose.connect(process.env.DATABASE_URL);
-
-    console.log("Mongoose connection done");
-    logger("Mongoose connection done");
   } catch (error) {
-    console.log(`Mongoose connection error: ${error}`);
-    logger(`Mongoose connection error: ${error}`, "errorLogs.txt");
+    console.log(`Error connecting to MongoDB: ${error}`)
   }
 }
 
