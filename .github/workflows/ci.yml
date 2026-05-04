@@ -96,15 +96,22 @@ jobs:
         run: yarn test
         env:
           NODE_ENV: test
-          JWT_SECRET_KEY: test-secret
-          JWT_REFRESH_SECRET_KEY: test-refresh-secret
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          JWT_REFRESH_SECRET_KEY: ${{ secrets.JWT_REFRESH_SECRET_KEY }}
           JWT_ACCESS_TOKEN_EXPIRATION: 15m
           JWT_REFRESH_TOKEN_EXPIRATION: 1d
           JWT_LOGOUT_TOKEN_EXPIRATION: 1s
 
       - name: Test server startup
         working-directory: server
-        run: timeout 10s yarn start:test
+        run: |
+          timeout 10s yarn start:test || exit_code=$?
+          if [ "${exit_code:-0}" = "124" ]; then
+            echo "Server stayed up for 10 seconds"
+            exit 0
+          fi
+          exit "${exit_code:-0}"
         env:
           NODE_ENV: test
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -136,8 +143,8 @@ jobs:
           docker run -d --name test-backend -p 4000:4000 \
             -e NODE_ENV=test \
             -e DATABASE_URL=${{ secrets.DATABASE_URL }} \
-            -e JWT_SECRET_KEY=test-secret \
-            -e JWT_REFRESH_SECRET_KEY=test-refresh-secret \
+            -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
+            -e JWT_REFRESH_SECRET_KEY=${{ secrets.JWT_REFRESH_SECRET_KEY }} \
             -e JWT_ACCESS_TOKEN_EXPIRATION=15m \
             -e JWT_REFRESH_TOKEN_EXPIRATION=1d \
             -e JWT_LOGOUT_TOKEN_EXPIRATION=1s \
