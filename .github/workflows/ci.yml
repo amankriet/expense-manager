@@ -67,7 +67,8 @@ jobs:
   test-env-smoke:
     runs-on: ubuntu-latest
     needs: test-and-build
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name
+      == 'dev')
     environment: test
 
     steps:
