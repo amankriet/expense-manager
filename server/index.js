@@ -44,7 +44,7 @@ try {
             const router = routerModule.default
 
             // noinspection JSCheckFunctionSignatures
-            app.use(path.join("/api/v1", file.split(".")[0]), router)
+            app.use(path.join("/v1", file.split(".")[0]), router)
         }
     })
     // check res.http file for all available routes
@@ -56,6 +56,8 @@ try {
 app.get("/", (req, res) => {
     return res.send('Expense Manager')
 })
+
+app.get("/health", (req, res) => res.send("OK"));
 
 const port = process.env.PORT || 3002
 

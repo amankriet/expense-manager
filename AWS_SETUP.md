@@ -167,9 +167,21 @@ Where:
 3. Task definition: Select your task definition
 4. Service name: `expense-manager-backend-service`
 5. Number of tasks: `1`
-6. Networking: Configure VPC, subnets, security groups
-7. Load balancer: Configure if needed
-8. Click `Create`
+6. Networking: Configure VPC, subnets, and security groups
+7. Load balancer: Select `Application Load Balancer`
+   - Create or use an existing target group
+   - Target group protocol: `HTTP`
+   - Target group port: `3002`
+   - Health check path: `/`
+   - Forward listener to the target group on port `3002`
+8. Set the service to use the ALB and the target group
+9. Click `Create`
+
+### 5.4 Notes for API URL
+- After service creation, note the ALB DNS name in the Load Balancer console
+- Your backend API base URL will be:
+  `https://<your-alb-dns-name>/v1`
+- Use that value for `VITE_API_BASE_URL` in your frontend environment variables
 
 ## Step 6: Configure GitHub Secrets
 
@@ -206,10 +218,11 @@ Where:
 1. **ECR**: Check if image was pushed
 2. **Amplify**: Check if frontend was deployed and shows green checkmark
 3. **ECS**: Check if service was updated (if configured)
+4. **ALB**: Check the load balancer DNS and target group health
 
 ### 7.3 Access Your Application
 - **Frontend**: Use your Amplify domain (e.g., `https://main.d1a2b3c4d5e6f.amplifyapp.com`)
-- **Backend**: Use your ECS service URL or load balancer URL
+- **Backend**: Use your ALB DNS name plus `/v1` (for example `https://my-alb-123456.us-east-1.elb.amazonaws.com/v1`)
 
 ## Troubleshooting
 
@@ -230,6 +243,11 @@ Where:
    - Check cluster and service names are correct
    - Verify ECS service exists
    - Check IAM permissions for ECS
+
+4. **ALB or Target Group Issues**
+   - Verify the ALB listener is forwarding to the correct target group
+   - Confirm target group health checks are passing on port `3002`
+   - Ensure service security groups allow traffic from the ALB
 
 ### Debug Steps
 

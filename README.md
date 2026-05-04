@@ -101,7 +101,7 @@ DATABASE_URL=mongodb://localhost:27017/expense_manager_development
 
 **Client example values:**
 ```
-VITE_API_BASE_URL=http://localhost:3001/api/v1
+VITE_API_BASE_URL=http://localhost:3001/v1
 ```
 
 **Client environment files:**
