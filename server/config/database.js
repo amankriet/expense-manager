@@ -1,7 +1,17 @@
 import mongoose from "mongoose";
 import logger from "../middlewares/logger.js";
 
-main().catch((err) => console.log(err));
+export async function connectDB() {
+  try {
+    await mongoose.connect(process.env.DATABASE_URL);
+
+    console.log("Mongoose connection done");
+    logger("Mongoose connection done");
+  } catch (error) {
+    console.log(`Mongoose connection error: ${error}`);
+    logger(`Mongoose connection error: ${error}`, "errorLogs.txt");
+  }
+}
 
 mongoose.connection.on("connected", function () {
   console.log("Mongoose connection done")
@@ -15,13 +25,9 @@ mongoose.connection.on("error", function (error) {
 
 mongoose.connection.on("disconnected", function () {
   mongoose.connection
-      .close()
-      .then(r => {
-    console.log("Mongoose connection disconnected")
-    logger('Mongoose connection disconnected')
-  })
+    .close()
+    .then(r => {
+      console.log("Mongoose connection disconnected")
+      logger('Mongoose connection disconnected')
+    })
 })
-
-async function main() {
-  await mongoose.connect(process.env.DATABASE_URL);
-}

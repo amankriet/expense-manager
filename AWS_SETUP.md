@@ -157,7 +157,7 @@ Where:
 6. Add container:
    - Name: `expense-manager-backend`
    - Image: `123456789012.dkr.ecr.us-east-1.amazonaws.com/expense-manager/backend:latest`
-   - Port mappings: `3002` (or your backend port)
+   - Port mappings: `3001` (or your backend port)
    - Environment variables: Add your production env vars
 7. Click `Create`
 
@@ -171,9 +171,9 @@ Where:
 7. Load balancer: Select `Application Load Balancer`
    - Create or use an existing target group
    - Target group protocol: `HTTP`
-   - Target group port: `3002`
+   - Target group port: `3001`
    - Health check path: `/`
-   - Forward listener to the target group on port `3002`
+   - Forward listener to the target group on port `3001`
 8. Set the service to use the ALB and the target group
 9. Click `Create`
 
@@ -246,7 +246,7 @@ Where:
 
 4. **ALB or Target Group Issues**
    - Verify the ALB listener is forwarding to the correct target group
-   - Confirm target group health checks are passing on port `3002`
+   - Confirm target group health checks are passing on port `3001`
    - Ensure service security groups allow traffic from the ALB
 
 ### Debug Steps
