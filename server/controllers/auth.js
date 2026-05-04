@@ -28,7 +28,7 @@ export const login = async (req, res) => {
             expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION,
         });
 
-        const refreshToken = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
+        const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET_KEY, {
             expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRATION,
         });
 
@@ -47,7 +47,7 @@ export const login = async (req, res) => {
         res.cookie("jwt", refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production', // Set secure flag in production 
-            sameSite: "strict",
+            sameSite: "lax",
             maxAge: 30 * 60 * 60 * 1000
         })
 
@@ -117,9 +117,11 @@ export const signup = async (req, res) => {
                     email: email,
                     mobile: mobile,
                     dob: dob,
-                    role: role,
-                    token: `Bearer ${accessToken}`
+                    role: role
                 },
+                tokens: {
+                    accessToken: `Bearer ${accessToken}`
+                }
             });
         }
     } catch (error) {
@@ -169,7 +171,7 @@ export const handleRefreshToken = async (req, res) => {
         });
 
         // Generate new refresh token
-        const refreshToken = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
+        const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET_KEY, {
             expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRATION,
         });
 
@@ -186,7 +188,7 @@ export const handleRefreshToken = async (req, res) => {
         res.cookie("jwt", refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production', // Set secure flag in production
-            sameSite: "strict",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             maxAge: 30 * 60 * 60 * 1000
         })
 

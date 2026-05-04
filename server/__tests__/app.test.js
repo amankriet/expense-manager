@@ -1,3 +1,7 @@
+import { jest } from '@jest/globals';
+
+jest.setTimeout(20000);
+
 import request from 'supertest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
@@ -5,18 +9,33 @@ import app from '../index.js';
 
 let mongoServer;
 
-beforeAll(async () => {
-    // Start in-memory MongoDB instance
+export const connectTestDB = async () => {
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
-    await mongoose.connect(mongoUri);
-});
 
-afterAll(async () => {
-    // Close database connection and stop server
+    if (mongoose.connection.readyState === 0) {
+        await mongoose.connect(mongoUri);
+    }
+};
+
+export const disconnectTestDB = async () => {
     await mongoose.connection.dropDatabase();
     await mongoose.connection.close();
     await mongoServer.stop();
+};
+
+beforeAll(async () => {
+    // Start in-memory MongoDB instance
+    await connectTestDB();
+});
+
+afterAll(async () => {
+    const collections = mongoose.connection.collections;
+    for (const key in collections) {
+        await collections[key].deleteMany();
+    }
+    // Close database connection and stop server
+    await disconnectTestDB();
 });
 
 describe('Server Health Check', () => {
@@ -38,18 +57,22 @@ describe('Server Health Check', () => {
 describe('Authentication Routes', () => {
     test('should register a new user', async () => {
         const userData = {
-            email: 'test@example.com',
-            password: 'testpassword123',
-            name: 'Test User'
+            firstName: "Test",
+            lastName: "User",
+            email: "test@example.com",
+            password: "testpassword123",
+            "mobile": 9876543210,
+            "dob": "1997-06-20",
+            "role": "admin"
         };
 
         const response = await request(app)
-            .post('/api/auth/register')
+            .post('/v1/auth/signup')
             .send(userData)
             .expect(201);
 
-        expect(response.body).toHaveProperty('message');
-        expect(response.body).toHaveProperty('user');
+        expect(response.body).toHaveProperty('success', true);
+        expect(response.body.tokens).toHaveProperty('accessToken');
     });
 
     test('should login user', async () => {
@@ -59,11 +82,11 @@ describe('Authentication Routes', () => {
         };
 
         const response = await request(app)
-            .post('/api/auth/login')
+            .post('/v1/auth/login')
             .send(loginData)
             .expect(200);
 
-        expect(response.body).toHaveProperty('token');
-        expect(response.body).toHaveProperty('user');
+        expect(response.body).toHaveProperty('success', true);
+        expect(response.body.tokens).toHaveProperty('accessToken');
     });
 });
