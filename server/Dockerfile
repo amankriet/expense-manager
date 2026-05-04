@@ -3,5 +3,5 @@ WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn install --production
 COPY . .
-EXPOSE 4000
-CMD ["node", "dist/index.js"]
+EXPOSE 3001
+CMD ["yarn", "start:prod"]
