@@ -72,8 +72,27 @@ jobs:
     environment: test
 
     steps:
-      - name: Run server tests
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "yarn"
+          cache-dependency-path: |
+            yarn.lock
+            server/yarn.lock
+
+      - name: Install root dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Install server dependencies
         working-directory: ./server
+        run: yarn install --frozen-lockfile
+
+      - name: Run server tests
+        working-directory: server
         run: yarn test
         env:
           NODE_ENV: test
@@ -84,7 +103,7 @@ jobs:
           JWT_LOGOUT_TOKEN_EXPIRATION: 1s
 
       - name: Test server startup
-        working-directory: ./server
+        working-directory: server
         run: timeout 10s yarn start:test
         env:
           NODE_ENV: test
