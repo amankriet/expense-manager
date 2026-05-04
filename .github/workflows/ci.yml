@@ -8,6 +8,7 @@ on:
 
 env:
   NODE_VERSION: '20.x'
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   test-and-build:
@@ -15,7 +16,7 @@ jobs:
 
     services:
       mongodb:
-        image: mongo:7.0
+        image: mongo:6.0
         ports:
           - 27017:27017
         options: >-
