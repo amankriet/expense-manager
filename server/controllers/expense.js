@@ -1,18 +1,36 @@
 import ExpenseModel from "../models/ExpenseModel.js"
 import { PAGINATION, EXCLUDED_FIELDS } from "../utils/common.js"
 
+const getAuthenticatedUserId = (req) => req.user?._id || req.user?.id
+
 export const addExpense = async (req, res) => {
+    const userId = getAuthenticatedUserId(req)
+
+    if (!userId) {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized! Please login again",
+            error: "Missing authenticated user id"
+        })
+    }
+
     try {
         const expense = await ExpenseModel.create({
-            userId: req.user.id,
+            userId,
             ...req.body
-        }).select(EXCLUDED_FIELDS)
+        })
 
         if (expense) {
+            const sanitizedExpense = expense.toObject()
+            delete sanitizedExpense.userId
+            delete sanitizedExpense.createdAt
+            delete sanitizedExpense.updatedAt
+            delete sanitizedExpense.__v
+
             return res.status(201).json({
                 success: true,
                 message: "User expense added successfully",
-                expense
+                expense: sanitizedExpense
             })
         } else {
             return res.status(500).json({
@@ -31,6 +49,8 @@ export const addExpense = async (req, res) => {
 }
 
 export const getAllExpenses = async (req, res) => {
+    const userId = getAuthenticatedUserId(req)
+
     if (req.error) {
         return res.status(500).json({
             success: false,
@@ -39,11 +59,19 @@ export const getAllExpenses = async (req, res) => {
         })
     }
 
+    if (!userId) {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized! Please login again",
+            error: "Missing authenticated user id"
+        })
+    }
+
     const { limit = PAGINATION.DEFAULT_LIMIT, page = PAGINATION.DEFAULT_PAGE } = req.query
     const skipData = limit * (page - 1)
     try {
         const expenses = await ExpenseModel
-            .find({ userId: req.user.id })
+            .find({ userId })
             .skip(skipData)
             .limit(limit)
             .select(EXCLUDED_FIELDS)
@@ -73,11 +101,21 @@ export const getAllExpenses = async (req, res) => {
 }
 
 export const getExpense = async (req, res) => {
+    const userId = getAuthenticatedUserId(req)
+
     if (req.error) {
         return res.status(500).json({
             success: false,
             message: "Something went wrong",
             error: req.error.toString()
+        })
+    }
+
+    if (!userId) {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized! Please login again",
+            error: "Missing authenticated user id"
         })
     }
 
@@ -92,7 +130,7 @@ export const getExpense = async (req, res) => {
     }
 
     try {
-        const expense = await ExpenseModel.findById(expenseid)
+        const expense = await ExpenseModel.findOne({ _id: expenseid, userId })
             .select(EXCLUDED_FIELDS)
 
         if (expense) {
@@ -118,6 +156,8 @@ export const getExpense = async (req, res) => {
 }
 
 export const updateExpense = async (req, res) => {
+    const userId = getAuthenticatedUserId(req)
+
     if (req.error) {
         return res.status(500).json({
             success: false,
@@ -126,17 +166,56 @@ export const updateExpense = async (req, res) => {
         })
     }
 
+    if (!userId) {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized! Please login again",
+            error: "Missing authenticated user id"
+        })
+    }
+
     const expenseid = req.query.id
 
-    console.log(expenseid)
+    if (!expenseid) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid request. Please select an expense to update",
+            error: "Invalid request. Missing expense id"
+        })
+    }
 
-    return res.status(200).json({
-        success: true,
-        message: `Update expense ${req.params.id} data`
-    })
+    try {
+        const expense = await ExpenseModel.findOneAndUpdate(
+            { _id: expenseid, userId },
+            req.body,
+            { new: true, runValidators: true }
+        ).select(EXCLUDED_FIELDS)
+
+        if (expense) {
+            return res.status(200).json({
+                success: true,
+                message: "Expense updated successfully",
+                expense
+            })
+        }
+
+        return res.status(404).json({
+            success: false,
+            message: "Expense not found. Please try again",
+            error: "Expense not found. Invalid expense id"
+        })
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: "Failed to update user expense",
+            error: error.toString()
+        })
+    }
 }
 
 export const deleteExpense = async (req, res) => {
+    const userId = getAuthenticatedUserId(req)
+
     if (req.error) {
         return res.status(500).json({
             success: false,
@@ -145,12 +224,48 @@ export const deleteExpense = async (req, res) => {
         })
     }
 
+    if (!userId) {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized! Please login again",
+            error: "Missing authenticated user id"
+        })
+    }
+
     const expenseid = req.query.id
 
-    console.log(expenseid)
+    if (!expenseid) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid request. Please select an expense to delete",
+            error: "Invalid request. Missing expense id"
+        })
+    }
 
-    res.status(200).json({
-        success: true,
-        message: `Delete expense ${req.params.id} data`
-    })
+    try {
+        const expense = await ExpenseModel.findOneAndDelete({
+            _id: expenseid,
+            userId
+        }).select(EXCLUDED_FIELDS)
+
+        if (expense) {
+            return res.status(200).json({
+                success: true,
+                message: "Expense deleted successfully",
+                expense
+            })
+        }
+
+        return res.status(404).json({
+            success: false,
+            message: "Expense not found. Please try again",
+            error: "Expense not found. Invalid expense id"
+        })
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: "Failed to delete user expense",
+            error: error.toString()
+        })
+    }
 }

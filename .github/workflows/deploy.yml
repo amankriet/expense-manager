@@ -109,5 +109,4 @@ jobs:
           aws amplify start-job \
             --app-id ${{ secrets.AMPLIFY_APP_ID }} \
             --branch-name main \
-            --job-type RELEASE \
-            --job-id "github-actions-${{ github.run_id }}"
+            --job-type RELEASE
