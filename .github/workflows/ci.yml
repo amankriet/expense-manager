@@ -140,7 +140,7 @@ jobs:
       - name: Test Docker image
         working-directory: ./server
         run: |
-          docker run -d --name test-backend -p 4000:4000 \
+          docker run -d --name test-backend -p 3001:3001 \
             -e NODE_ENV=test \
             -e DATABASE_URL=${{ secrets.DATABASE_URL }} \
             -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
