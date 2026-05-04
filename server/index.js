@@ -1,6 +1,5 @@
 import express from "express"
 import cors from "cors"
-import "./config/database.js"
 import passport from "passport"
 import "./config/passport.js"
 import path from "path"
@@ -57,8 +56,8 @@ app.get("/", (req, res) => {
     return res.send('Expense Manager')
 })
 
-app.get("/health", (req, res) => res.send("OK"));
+app.get("/health", (req, res) => {
+    res.status(200).json({ status: "ok" });
+});
 
-const port = process.env.PORT || 3002
-
-app.listen(port, () => console.log(`App is listening on port: ${port}`))
+export default app;
