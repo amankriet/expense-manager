@@ -16,7 +16,8 @@ const whiteList = [
     'http://localhost:3001',
     'http://localhost:3000',
     'http://localhost:5173',
-    'https://www.amankriet.com/'
+    'https://www.amankriet.com',
+    'https://amankriet.com',
 ]
 const corsOptionsDelegate = function (req, callback) {
     let corsOptions;
