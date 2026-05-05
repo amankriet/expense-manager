@@ -125,6 +125,16 @@ export const signup = async (req, res) => {
             });
         }
     } catch (error) {
+        if (error.code === 11000) {
+            const duplicateField = Object.keys(error.keyPattern || {})[0] || "field";
+
+            return res.status(409).json({
+                success: false,
+                message: `${duplicateField} already exists`,
+                error: error.toString(),
+            });
+        }
+
         return res.status(500).json({
             success: false,
             message: "Something went wrong",
