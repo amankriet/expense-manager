@@ -1,20 +1,39 @@
 import { useMemo, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
-import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useNavigate,
+} from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import styled from "styled-components";
-import { AxiosError } from "axios";
 import { AuthProvider } from "./context/auth-context";
 import { useAuth } from "./hooks/use-auth";
-import { logoutApi, signInApi, signUpApi } from "./api/auth";
+import { logoutApi } from "./api/auth";
 import {
   addTransactionApi,
   deleteTransactionApi,
   getTransactionsApi,
   updateTransactionApi,
 } from "./api/transactions";
-import type { SignInSignUpResponse, SignUpRequest } from "./types/auth";
-import type { Transaction, TransactionFormData, TransactionType } from "./types/transactions";
+import type {
+  Transaction,
+  TransactionFormData,
+  TransactionType,
+} from "./types/transactions";
+import {
+  Eyebrow,
+  Field,
+  FormHeader,
+  InlineError,
+  PrimaryButton,
+  TwoColumn,
+} from "./components/StyledHtmlTags";
+import NotFound from "./NotFound";
+import AuthScreen from "./components/AuthScreen";
+import { getErrorMessage } from "./utils/functions";
 
 const blankTransaction: TransactionFormData = {
   title: "",
@@ -25,18 +44,6 @@ const blankTransaction: TransactionFormData = {
   description: "",
 };
 
-const getErrorMessage = (error: unknown) => {
-  if (error instanceof AxiosError) {
-    return error.response?.data?.message ?? error.message;
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Something went wrong";
-};
-
 function App() {
   return (
     <AuthProvider>
@@ -44,6 +51,7 @@ function App() {
         <Routes>
           <Route path="/signin" element={<AuthScreen mode="signin" />} />
           <Route path="/signup" element={<AuthScreen mode="signup" />} />
+          <Route path="/404" element={<NotFound />} />
           <Route
             path="/"
             element={
@@ -52,7 +60,7 @@ function App() {
               </ProtectedPage>
             }
           />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/404" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
@@ -62,147 +70,6 @@ function App() {
 function ProtectedPage({ children }: { children: ReactNode }) {
   const { token } = useAuth();
   return token ? children : <Navigate to="/signin" replace />;
-}
-
-function AuthScreen({ mode }: { mode: "signin" | "signup" }) {
-  const navigate = useNavigate();
-  const { signin } = useAuth();
-  const isSignup = mode === "signup";
-  const [errorMessage, setErrorMessage] = useState("");
-  const [form, setForm] = useState<SignUpRequest>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    mobile: "",
-    dob: "",
-    password: "",
-    role: "user",
-  });
-
-  const authMutation = useMutation<SignInSignUpResponse, Error>({
-    mutationFn: () => {
-      if (isSignup) {
-        return signUpApi(form);
-      }
-
-      return signInApi({
-        email: form.email,
-        password: form.password,
-      });
-    },
-    onSuccess: (data) => {
-      signin(data.tokens.accessToken, data.user, () => navigate("/", { replace: true }));
-    },
-    onError: (error) => setErrorMessage(getErrorMessage(error)),
-  });
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setErrorMessage("");
-    authMutation.mutate();
-  };
-
-  return (
-    <AuthPage>
-      <BrandPanel>
-        <LogoMark>EM</LogoMark>
-        <AuthTitle>{isSignup ? "Create your account" : "Welcome back"}</AuthTitle>
-        <AuthCopy>
-          Track income and expenses with a focused dashboard built for quick daily updates.
-        </AuthCopy>
-      </BrandPanel>
-
-      <AuthCard onSubmit={handleSubmit}>
-        <FormHeader>
-          <div>
-            <Eyebrow>{isSignup ? "Sign up" : "Sign in"}</Eyebrow>
-            <h1>{isSignup ? "Start managing money" : "Open your dashboard"}</h1>
-          </div>
-        </FormHeader>
-
-        {isSignup && (
-          <TwoColumn>
-            <Field>
-              <span>First name</span>
-              <input
-                required
-                value={form.firstName}
-                onChange={(event) => setForm({ ...form, firstName: event.target.value })}
-              />
-            </Field>
-            <Field>
-              <span>Last name</span>
-              <input
-                required
-                value={form.lastName}
-                onChange={(event) => setForm({ ...form, lastName: event.target.value })}
-              />
-            </Field>
-          </TwoColumn>
-        )}
-
-        <Field>
-          <span>Email</span>
-          <input
-            required
-            type="email"
-            value={form.email}
-            onChange={(event) => setForm({ ...form, email: event.target.value })}
-          />
-        </Field>
-
-        {isSignup && (
-          <TwoColumn>
-            <Field>
-              <span>Mobile</span>
-              <input
-                required
-                inputMode="numeric"
-                value={form.mobile}
-                onChange={(event) => setForm({ ...form, mobile: event.target.value })}
-              />
-            </Field>
-            <Field>
-              <span>Date of birth</span>
-              <input
-                required
-                type="date"
-                value={form.dob}
-                onChange={(event) => setForm({ ...form, dob: event.target.value })}
-              />
-            </Field>
-          </TwoColumn>
-        )}
-
-        <Field>
-          <span>Password</span>
-          <input
-            required
-            minLength={6}
-            type="password"
-            value={form.password}
-            onChange={(event) => setForm({ ...form, password: event.target.value })}
-          />
-        </Field>
-
-        {errorMessage && <InlineError>{errorMessage}</InlineError>}
-
-        <PrimaryButton type="submit" disabled={authMutation.isPending}>
-          {authMutation.isPending ? "Please wait..." : isSignup ? "Create account" : "Sign in"}
-        </PrimaryButton>
-
-        <SwitchText>
-          {isSignup ? "Already have an account?" : "New here?"}{" "}
-          <button
-            type="button"
-            onClick={() => navigate(isSignup ? "/signin" : "/signup", { replace: true })}
-          >
-            {isSignup ? "Sign in" : "Create account"}
-          </button>
-        </SwitchText>
-      </AuthCard>
-    </AuthPage>
-  );
 }
 
 function Dashboard() {
@@ -265,7 +132,8 @@ function Dashboard() {
 
   const deleteMutation = useMutation({
     mutationFn: deleteTransactionApi,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["transactions"] }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["transactions"] }),
     onError: (error) => setErrorMessage(getErrorMessage(error)),
   });
 
@@ -298,7 +166,11 @@ function Dashboard() {
         <div>
           <Eyebrow>Expense Manager</Eyebrow>
           <h1>Transactions</h1>
-          <p>{user?.name ? `Signed in as ${user.name}` : "Your personal money dashboard"}</p>
+          <p>
+            {user?.name
+              ? `Signed in as ${user.name}`
+              : "Your personal money dashboard"}
+          </p>
         </div>
         <GhostButton type="button" onClick={() => logoutMutation.mutate()}>
           Logout
@@ -347,7 +219,9 @@ function Dashboard() {
               required
               maxLength={20}
               value={form.title}
-              onChange={(event) => setForm({ ...form, title: event.target.value })}
+              onChange={(event) =>
+                setForm({ ...form, title: event.target.value })
+              }
             />
           </Field>
 
@@ -371,7 +245,9 @@ function Dashboard() {
                 required
                 type="date"
                 value={form.date}
-                onChange={(event) => setForm({ ...form, date: event.target.value })}
+                onChange={(event) =>
+                  setForm({ ...form, date: event.target.value })
+                }
               />
             </Field>
           </TwoColumn>
@@ -382,7 +258,10 @@ function Dashboard() {
               <select
                 value={form.type}
                 onChange={(event) =>
-                  setForm({ ...form, type: event.target.value as TransactionType })
+                  setForm({
+                    ...form,
+                    type: event.target.value as TransactionType,
+                  })
                 }
               >
                 <option value="Expense">Expense</option>
@@ -395,7 +274,9 @@ function Dashboard() {
                 required
                 maxLength={20}
                 value={form.category}
-                onChange={(event) => setForm({ ...form, category: event.target.value })}
+                onChange={(event) =>
+                  setForm({ ...form, category: event.target.value })
+                }
               />
             </Field>
           </TwoColumn>
@@ -406,7 +287,9 @@ function Dashboard() {
               required
               maxLength={50}
               value={form.description}
-              onChange={(event) => setForm({ ...form, description: event.target.value })}
+              onChange={(event) =>
+                setForm({ ...form, description: event.target.value })
+              }
             />
           </Field>
 
@@ -460,12 +343,17 @@ function Dashboard() {
                       <td>{formatCurrency(transaction.amount)}</td>
                       <td>
                         <ActionGroup>
-                          <GhostButton type="button" onClick={() => startEdit(transaction)}>
+                          <GhostButton
+                            type="button"
+                            onClick={() => startEdit(transaction)}
+                          >
                             Edit
                           </GhostButton>
                           <DangerButton
                             type="button"
-                            onClick={() => deleteMutation.mutate(transaction._id)}
+                            onClick={() =>
+                              deleteMutation.mutate(transaction._id)
+                            }
                             disabled={deleteMutation.isPending}
                           >
                             Delete
@@ -497,74 +385,6 @@ const formatDate = (date: string) =>
     month: "short",
     year: "numeric",
   }).format(new Date(date));
-
-const AuthPage = styled.main`
-  min-height: 100vh;
-  display: grid;
-  grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
-  background: #f6f3ee;
-
-  @media (max-width: 860px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const BrandPanel = styled.section`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 18px;
-  padding: 48px;
-  background: #26362f;
-  color: #fffdf7;
-
-  @media (max-width: 860px) {
-    padding: 32px 24px;
-  }
-`;
-
-const LogoMark = styled.div`
-  width: 58px;
-  height: 58px;
-  border-radius: 8px;
-  display: grid;
-  place-items: center;
-  background: #d5f365;
-  color: #1f2d27;
-  font-weight: 900;
-`;
-
-const AuthTitle = styled.h2`
-  max-width: 480px;
-  margin: 0;
-  font-size: clamp(2.2rem, 4vw, 4rem);
-  line-height: 1;
-`;
-
-const AuthCopy = styled.p`
-  max-width: 420px;
-  margin: 0;
-  color: #d7ded2;
-  font-size: 1.05rem;
-`;
-
-const AuthCard = styled.form`
-  align-self: center;
-  justify-self: center;
-  width: min(440px, calc(100% - 40px));
-  display: grid;
-  gap: 18px;
-  padding: 32px;
-  border: 1px solid #e4ded2;
-  border-radius: 8px;
-  background: #fffdf8;
-  box-shadow: 0 24px 80px rgba(45, 38, 25, 0.12);
-
-  @media (max-width: 560px) {
-    padding: 24px;
-    margin: 24px 0;
-  }
-`;
 
 const DashboardPage = styled.main`
   min-height: 100vh;
@@ -664,91 +484,8 @@ const TransactionsPanel = styled.section`
   background: #fffdf8;
 `;
 
-const FormHeader = styled.div`
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: 16px;
-
-  h1,
-  h2 {
-    margin: 4px 0 0;
-  }
-`;
-
 const PanelHeader = styled(FormHeader)`
   margin-bottom: 18px;
-`;
-
-const Eyebrow = styled.span`
-  display: block;
-  color: #637063;
-  font-size: 0.74rem;
-  font-weight: 800;
-  letter-spacing: 0;
-  text-transform: uppercase;
-`;
-
-const TwoColumn = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-
-  @media (max-width: 560px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const Field = styled.label`
-  display: grid;
-  gap: 7px;
-  color: #4c574f;
-  font-size: 0.9rem;
-  font-weight: 700;
-
-  input,
-  select,
-  textarea {
-    width: 100%;
-    min-height: 44px;
-    box-sizing: border-box;
-    border: 1px solid #d7d0c1;
-    border-radius: 8px;
-    background: #fff;
-    color: #202721;
-    font: inherit;
-    font-weight: 500;
-    padding: 10px 12px;
-    outline: none;
-  }
-
-  textarea {
-    min-height: 86px;
-    resize: vertical;
-  }
-
-  input:focus,
-  select:focus,
-  textarea:focus {
-    border-color: #26362f;
-    box-shadow: 0 0 0 3px rgba(38, 54, 47, 0.12);
-  }
-`;
-
-const PrimaryButton = styled.button`
-  min-height: 46px;
-  border: 0;
-  border-radius: 8px;
-  background: #26362f;
-  color: #fffdf8;
-  font: inherit;
-  font-weight: 800;
-  cursor: pointer;
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.65;
-  }
 `;
 
 const GhostButton = styled.button`
@@ -771,30 +508,6 @@ const GhostButton = styled.button`
 const DangerButton = styled(GhostButton)`
   color: #9a2d26;
   border-color: #e7c4bd;
-`;
-
-const SwitchText = styled.p`
-  margin: 0;
-  text-align: center;
-  color: #647069;
-
-  button {
-    border: 0;
-    background: none;
-    color: #26362f;
-    font: inherit;
-    font-weight: 900;
-    cursor: pointer;
-  }
-`;
-
-const InlineError = styled.p`
-  margin: 0;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: #fff1ee;
-  color: #9a2d26;
-  font-weight: 700;
 `;
 
 const CountBadge = styled.span`
