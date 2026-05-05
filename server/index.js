@@ -12,7 +12,12 @@ const __dirname = path.resolve()
 
 const app = express()
 
-const whiteList = ['http://localhost:3001', 'http://localhost:3000', 'http://localhost:5173']
+const whiteList = [
+    'http://localhost:3001',
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'https://www.amankriet.com/'
+]
 const corsOptionsDelegate = function (req, callback) {
     let corsOptions;
     if (whiteList.indexOf(req.header('Origin')) !== -1 || !req.header('Origin')) {
