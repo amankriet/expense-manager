@@ -5,6 +5,10 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -45,7 +49,7 @@ jobs:
           docker push "${IMAGE_URI}:${GITHUB_SHA}"
 
       - name: Update ECS service with new image
-        run: |
+        run: |+
           : "${AWS_ACCOUNT_ID:?AWS_ACCOUNT_ID is required}"
           : "${AWS_REGION:?AWS_REGION is required}"
           : "${ECR_REPOSITORY:?ECR_REPOSITORY is required}"
@@ -87,26 +91,44 @@ jobs:
             --cluster "$AWS_ECS_CLUSTER" \
             --service "$AWS_ECS_SERVICE" \
             --task-definition "$NEW_TASK_DEF_ARN"
+            
+  # Frontend deployment is currently disabled to avoid triggering duplicate Amplify releases when pushing to main.
+  # frontend:
+  #   needs: backend
+  #   runs-on: ubuntu-latest
+  #   environment: production
 
-  frontend:
-    needs: backend
-    runs-on: ubuntu-latest
-    environment: production
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v3
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+  #     - name: Trigger Amplify deployment
+  #       env:
+  #         AMPLIFY_APP_ID: ${{ secrets.AMPLIFY_APP_ID }}
+  #       run: |
+  #         : "${AMPLIFY_APP_ID:?AMPLIFY_APP_ID is required}"
 
-      - name: Trigger Amplify deployment
-        run: |
-          aws amplify start-job \
-            --app-id ${{ secrets.AMPLIFY_APP_ID }} \
-            --branch-name main \
-            --job-type RELEASE
+  #         ACTIVE_JOB_ID=$(aws amplify list-jobs \
+  #           --app-id "$AMPLIFY_APP_ID" \
+  #           --branch-name main \
+  #           --max-results 5 \
+  #           --query "jobSummaries[?status=='PENDING'||status=='PROVISIONING'||status=='RUNNING'] | [0].jobId" \
+  #           --output text)
+
+  #         if [ -n "$ACTIVE_JOB_ID" ] && [ "$ACTIVE_JOB_ID" != "None" ]; then
+  #           echo "Amplify branch main already has an active job: $ACTIVE_JOB_ID"
+  #           echo "Skipping duplicate Amplify release trigger."
+  #           exit 0
+  #         fi
+
+  #         aws amplify start-job \
+  #           --app-id "$AMPLIFY_APP_ID" \
+  #           --branch-name main \
+  #           --job-type RELEASE
