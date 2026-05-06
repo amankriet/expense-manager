@@ -67,7 +67,7 @@ export const getAllExpenses = async (req, res) => {
         })
     }
 
-    const { limit = PAGINATION.DEFAULT_LIMIT, page = PAGINATION.DEFAULT_PAGE } = req.query
+    const { limit = Number(PAGINATION.DEFAULT_LIMIT), page = Number(PAGINATION.DEFAULT_PAGE) } = req.query
     const skipData = limit * (page - 1)
     try {
         const expenses = await ExpenseModel

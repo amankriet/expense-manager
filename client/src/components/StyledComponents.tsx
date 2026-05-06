@@ -3,17 +3,17 @@ import styled from "styled-components";
 export const LogoMark = styled.div`
   width: 58px;
   height: 58px;
-  border-radius: 8px;
+  border-radius: ${({ theme }) => theme.radii.md};
   display: grid;
   place-items: center;
-  background: #d5f365;
-  color: #1f2d27;
+  background: ${({ theme }) => theme.colors.accent};
+  color: ${({ theme }) => theme.colors.brandDark};
   font-weight: 900;
 `;
 
 export const Eyebrow = styled.span`
   display: block;
-  color: #637063;
+  color: ${({ theme }) => theme.colors.mutedTextStrong};
   font-size: 0.74rem;
   font-weight: 800;
   letter-spacing: 0;
@@ -23,9 +23,9 @@ export const Eyebrow = styled.span`
 export const PrimaryButton = styled.button`
   min-height: 46px;
   border: 0;
-  border-radius: 8px;
-  background: #26362f;
-  color: #fffdf8;
+  border-radius: ${({ theme }) => theme.radii.md};
+  background: ${({ theme }) => theme.colors.brand};
+  color: ${({ theme }) => theme.colors.inverseText};
   font: inherit;
   font-weight: 800;
   cursor: pointer;
@@ -40,18 +40,18 @@ export const FormHeader = styled.div`
   display: flex;
   align-items: start;
   justify-content: space-between;
-  gap: 16px;
+  gap: ${({ theme }) => theme.spacing.lg};
 
   h1,
   h2 {
-    margin: 4px 0 0;
+    margin: ${({ theme }) => theme.spacing.xs} 0 0;
   }
 `;
 
 export const Field = styled.label`
   display: grid;
   gap: 7px;
-  color: #4c574f;
+  color: ${({ theme }) => theme.colors.textSoft};
   font-size: 0.9rem;
   font-weight: 700;
 
@@ -61,13 +61,13 @@ export const Field = styled.label`
     width: 100%;
     min-height: 44px;
     box-sizing: border-box;
-    border: 1px solid #d7d0c1;
-    border-radius: 8px;
-    background: #fff;
-    color: #202721;
+    border: 1px solid ${({ theme }) => theme.colors.borderStrong};
+    border-radius: ${({ theme }) => theme.radii.md};
+    background: ${({ theme }) => theme.colors.input};
+    color: ${({ theme }) => theme.colors.text};
     font: inherit;
     font-weight: 500;
-    padding: 10px 12px;
+    padding: 10px ${({ theme }) => theme.spacing.md};
     outline: none;
   }
 
@@ -79,17 +79,17 @@ export const Field = styled.label`
   input:focus,
   select:focus,
   textarea:focus {
-    border-color: #26362f;
-    box-shadow: 0 0 0 3px rgba(38, 54, 47, 0.12);
+    border-color: ${({ theme }) => theme.colors.brand};
+    box-shadow: ${({ theme }) => theme.shadows.focus};
   }
 `;
 
 export const InlineError = styled.p`
   margin: 0;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: #fff1ee;
-  color: #9a2d26;
+  padding: 10px ${({ theme }) => theme.spacing.md};
+  border-radius: ${({ theme }) => theme.radii.md};
+  background: ${({ theme }) => theme.colors.dangerSurface};
+  color: ${({ theme }) => theme.colors.danger};
   font-weight: 700;
 `;
 
@@ -98,7 +98,7 @@ export const TwoColumn = styled.div`
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
 
-  @media (max-width: 560px) {
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     grid-template-columns: 1fr;
   }
 `;
