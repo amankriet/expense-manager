@@ -38,7 +38,7 @@ const ExpenseSchema = new Schema(
     },
     description: {
       type: String,
-      required: true,
+      required: false,
       trim: true,
       maxLength: 50,
       default: ""

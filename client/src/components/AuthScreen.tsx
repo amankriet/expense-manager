@@ -13,8 +13,8 @@ import {
   LogoMark,
   PrimaryButton,
   TwoColumn,
-} from "./StyledHtmlTags";
-import { getErrorMessage } from "../utils/functions";
+} from "./StyledComponents";
+import { getErrorMessage } from "../utils/helpers";
 
 function AuthScreen({ mode }: { mode: "signin" | "signup" }) {
   const navigate = useNavigate();
@@ -186,9 +186,9 @@ const AuthPage = styled.main`
   min-height: 100vh;
   display: grid;
   grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
-  background: #f6f3ee;
+  background: ${({ theme }) => theme.colors.page};
 
-  @media (max-width: 860px) {
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
     grid-template-columns: 1fr;
   }
 `;
@@ -197,13 +197,14 @@ const BrandPanel = styled.section`
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 18px;
-  padding: 48px;
-  background: #26362f;
-  color: #fffdf7;
+  gap: ${({ theme }) => theme.spacing.xl};
+  padding: ${({ theme }) => theme.spacing["6xl"]};
+  background: ${({ theme }) => theme.colors.brand};
+  color: ${({ theme }) => theme.colors.surfaceStrong};
 
-  @media (max-width: 860px) {
-    padding: 32px 24px;
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    padding: ${({ theme }) => theme.spacing["4xl"]}
+      ${({ theme }) => theme.spacing["3xl"]};
   }
 `;
 
@@ -217,7 +218,7 @@ const AuthTitle = styled.h2`
 const AuthCopy = styled.p`
   max-width: 420px;
   margin: 0;
-  color: #d7ded2;
+  color: ${({ theme }) => theme.colors.inverseTextSoft};
   font-size: 1.05rem;
 `;
 
@@ -226,28 +227,28 @@ const AuthCard = styled.form`
   justify-self: center;
   width: min(440px, calc(100% - 40px));
   display: grid;
-  gap: 18px;
-  padding: 32px;
-  border: 1px solid #e4ded2;
-  border-radius: 8px;
-  background: #fffdf8;
-  box-shadow: 0 24px 80px rgba(45, 38, 25, 0.12);
+  gap: ${({ theme }) => theme.spacing.xl};
+  padding: ${({ theme }) => theme.spacing["4xl"]};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radii.md};
+  background: ${({ theme }) => theme.colors.surface};
+  box-shadow: ${({ theme }) => theme.shadows.card};
 
-  @media (max-width: 560px) {
-    padding: 24px;
-    margin: 24px 0;
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    padding: ${({ theme }) => theme.spacing["3xl"]};
+    margin: ${({ theme }) => theme.spacing["3xl"]} 0;
   }
 `;
 
 const SwitchText = styled.p`
   margin: 0;
   text-align: center;
-  color: #647069;
+  color: ${({ theme }) => theme.colors.mutedText};
 
   button {
     border: 0;
     background: none;
-    color: #26362f;
+    color: ${({ theme }) => theme.colors.brand};
     font: inherit;
     font-weight: 900;
     cursor: pointer;

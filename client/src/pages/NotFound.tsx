@@ -1,7 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "./hooks/use-auth";
+import { useAuth } from "../hooks/use-auth";
 import styled from "styled-components";
-import { Eyebrow, LogoMark, PrimaryButton } from "./components/StyledHtmlTags";
+import {
+  Eyebrow,
+  LogoMark,
+  PrimaryButton,
+} from "../components/StyledComponents";
 
 function NotFound() {
   const navigate = useNavigate();
@@ -31,19 +35,19 @@ const NotFoundPage = styled.main`
   min-height: 100vh;
   display: grid;
   place-items: center;
-  padding: 24px;
-  background: #f6f3ee;
+  padding: ${({ theme }) => theme.spacing["3xl"]};
+  background: ${({ theme }) => theme.colors.page};
 `;
 
 const NotFoundCard = styled.section`
   width: min(520px, 100%);
   display: grid;
-  gap: 18px;
-  padding: 34px;
-  border: 1px solid #e4ded2;
-  border-radius: 8px;
-  background: #fffdf8;
-  box-shadow: 0 24px 80px rgba(45, 38, 25, 0.12);
+  gap: ${({ theme }) => theme.spacing.xl};
+  padding: ${({ theme }) => theme.spacing["5xl"]};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radii.md};
+  background: ${({ theme }) => theme.colors.surface};
+  box-shadow: ${({ theme }) => theme.shadows.card};
 
   h1 {
     margin: 0;
@@ -53,7 +57,7 @@ const NotFoundCard = styled.section`
 
   p {
     margin: 0;
-    color: #657169;
+    color: ${({ theme }) => theme.colors.mutedText};
     font-size: 1.05rem;
   }
 `;
