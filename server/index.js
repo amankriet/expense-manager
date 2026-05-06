@@ -7,6 +7,7 @@ import fs from "fs"
 import cookieParser from "cookie-parser"
 import logger from "./middlewares/logger.js"
 import { ERROR_LOGS_FILE } from "./utils/common.js";
+import { ensureDatabaseConnection } from "./middlewares/databaseConnection.js"
 
 const __dirname = path.resolve()
 
@@ -34,6 +35,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use(passport.initialize())
+app.use(ensureDatabaseConnection)
 
 // connect to the "/routes" directory
 const routersPath = path.join(__dirname, "routes")

@@ -1,5 +1,5 @@
 export const QUERY_KEYS = {
-    USER: "user",
-    EXPENSES: "expenses",
-    CATEGORIES: "categories",
-};
+  USER: ["user"],
+  TRANSACTIONS: ["transactions"],
+  CATEGORIES: ["categories"],
+} as const;

@@ -1,7 +1,7 @@
 import UserModel from "../models/UserModel.js";
 import dayjs from "dayjs";
 import localizedFormat from 'dayjs/plugin/localizedFormat.js';
-import {EXCLUDED_FIELDS, PAGINATION} from "../utils/common.js";
+import { EXCLUDED_FIELDS, PAGINATION } from "../utils/common.js";
 
 dayjs.extend(localizedFormat);
 
@@ -14,7 +14,7 @@ export const getAllUsers = async (req, res) => {
     })
   }
 
-  const { limit = PAGINATION.DEFAULT_LIMIT, page = PAGINATION.DEFAULT_PAGE } = req.query
+  const { limit = Number(PAGINATION.DEFAULT_LIMIT), page = Number(PAGINATION.DEFAULT_PAGE) } = req.query
   const skipData = (page - 1) * limit
 
   if (req.user.role == "admin") {
