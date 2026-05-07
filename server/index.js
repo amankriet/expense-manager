@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser"
 import logger from "./middlewares/logger.js"
 import { ERROR_LOGS_FILE } from "./utils/common.js";
 import { ensureDatabaseConnection } from "./middlewares/databaseConnection.js"
+import mongoSanitize from "express-mongo-sanitize";
 
 const __dirname = path.resolve()
 
@@ -30,6 +31,7 @@ app.use(cors({
 }))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+app.use(mongoSanitize());
 app.use(passport.initialize())
 app.use(ensureDatabaseConnection)
 

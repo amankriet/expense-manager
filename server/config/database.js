@@ -9,6 +9,7 @@ export async function connectDB() {
       return;
     }
 
+    mongoose.set("strictQuery", true);
     const db = await mongoose.connect(process.env.DATABASE_URL, {
       maxPoolSize: 10,
       minPoolSize: 2,

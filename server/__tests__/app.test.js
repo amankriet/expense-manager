@@ -55,24 +55,30 @@ describe('Server Health Check', () => {
 });
 
 describe('Authentication Routes', () => {
+    const agent = request.agent(app);
+
     test('should register a new user', async () => {
         const userData = {
             firstName: "Test",
             lastName: "User",
             email: "test@example.com",
             password: "testpassword123",
-            "mobile": 9876543210,
-            "dob": "1997-06-20",
-            "role": "admin"
+            mobile: 9876543210,
+            dob: "1997-06-20",
+            role: "admin"
         };
 
-        const response = await request(app)
+        const response = await agent
             .post('/v1/auth/signup')
-            .send(userData)
-            .expect(201);
+            .send(userData);
 
-        expect(response.body).toHaveProperty('success', true);
-        expect(response.body.tokens).toHaveProperty('accessToken');
+        console.log(response.body);
+
+        expect(response.status).toBe(201);
+        expect(response.body.success).toBe(true);
+
+        // verify refresh token cookie exists
+        expect(response.headers['set-cookie']).toBeDefined();
     });
 
     test('should login user', async () => {
@@ -81,12 +87,16 @@ describe('Authentication Routes', () => {
             password: 'testpassword123'
         };
 
-        const response = await request(app)
+        const response = await agent
             .post('/v1/auth/login')
-            .send(loginData)
-            .expect(200);
+            .send(loginData);
 
-        expect(response.body).toHaveProperty('success', true);
-        expect(response.body.tokens).toHaveProperty('accessToken');
+        console.log(response.body);
+
+        expect(response.status).toBe(200);
+        expect(response.body.success).toBe(true);
+
+        // verify cookie set
+        expect(response.headers['set-cookie']).toBeDefined();
     });
 });

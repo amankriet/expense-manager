@@ -11,7 +11,7 @@ export const login = async (req, res) => {
     try {
         // Find user by email
         const sanitizedEmail = String(email).trim().toLowerCase();
-        const user = await UserModel.findOne({ sanitizedEmail });
+        const user = await UserModel.findOne({ email: sanitizedEmail });
 
         if (!user || !compareSync(password, user.password)) {
             return res.status(401).json({
@@ -84,58 +84,122 @@ export const login = async (req, res) => {
 }
 
 export const signup = async (req, res) => {
-    const { firstName, lastName, email, password, mobile, dob, role } = req.body;
+    const {
+        firstName,
+        lastName,
+        email,
+        password,
+        mobile,
+        dob,
+        role,
+    } = req.body;
 
     try {
-        // check if user already exists
-        const sanitizedEmail = String(email).trim().toLowerCase();
-        const existingUser = await UserModel.findOne({ sanitizedEmail });
+        const sanitizedEmail = String(email)
+            .trim()
+            .toLowerCase();
+
+        // check existing user
+        const existingUser = await UserModel.findOne({
+            email: sanitizedEmail,
+        });
+
         if (existingUser) {
             return res.status(409).json({
                 success: false,
                 message: "Email already exists",
-                error: "Conflicting email! If you are already registered, please go to login. Else, please check your email address.",
-            })
-        } else {
-            // Create new user
-            const newUser = await UserModel.create({
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                password: password,
-                mobile: mobile,
-                dob: dob,
-                role: role
-            });
-
-            const payload = {
-                email: email,
-                id: newUser._id,
-            };
-
-            const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
-                expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION,
-            });
-
-            return res.status(201).json({
-                success: true,
-                message: "User created successfully",
-                user: {
-                    id: newUser._id,
-                    name: `${newUser.firstName} ${newUser.lastName}`,
-                    email: email,
-                    mobile: mobile,
-                    dob: dob,
-                    role: role
-                },
-                tokens: {
-                    accessToken: accessToken
-                }
+                error:
+                    "Conflicting email! If you are already registered, please login.",
             });
         }
+
+        // create user
+        const newUser = await UserModel.create({
+            firstName,
+            lastName,
+            email: sanitizedEmail,
+            password,
+            mobile,
+            dob,
+            role,
+        });
+
+        // jwt payload
+        const payload = {
+            email: newUser.email,
+            id: newUser._id,
+        };
+
+        // access token
+        const accessToken = jwt.sign(
+            payload,
+            process.env.JWT_SECRET_KEY,
+            {
+                expiresIn:
+                    process.env.JWT_ACCESS_TOKEN_EXPIRATION,
+            }
+        );
+
+        // refresh token
+        const refreshToken = jwt.sign(
+            payload,
+            process.env.JWT_REFRESH_SECRET_KEY,
+            {
+                expiresIn:
+                    process.env.JWT_REFRESH_TOKEN_EXPIRATION,
+            }
+        );
+
+        // store refresh token
+        await UserModel.findByIdAndUpdate(newUser._id, {
+            $push: {
+                refreshTokens: {
+                    $each: [
+                        {
+                            token: refreshToken,
+                            userAgent:
+                                req.headers["user-agent"],
+                        },
+                    ],
+                    $slice: -5,
+                },
+            },
+            $set: {
+                lastUpdatedBy: newUser._id,
+                lastLoginAt: new Date(),
+            },
+        });
+
+        // set refresh token cookie
+        res.cookie("jwt", refreshToken, {
+            httpOnly: true,
+            secure:
+                process.env.NODE_ENV === "production",
+            sameSite:
+                process.env.NODE_ENV === "production" ? "none" : "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: "User created successfully",
+            user: {
+                id: newUser._id,
+                name: `${newUser.firstName} ${newUser.lastName}`,
+                email: newUser.email,
+                mobile: newUser.mobile,
+                dob: newUser.dob,
+                role: newUser.role,
+            },
+            tokens: {
+                accessToken,
+            },
+        });
     } catch (error) {
         if (error.code === 11000) {
-            const duplicateField = Object.keys(error.keyPattern || {})[0] || "field";
+            const duplicateField =
+                Object.keys(error.keyPattern || {})[0] ||
+                "field";
 
             return res.status(409).json({
                 success: false,
@@ -311,7 +375,7 @@ export const forgotPassword = async (req, res) => {
     const sanitizedEmail = String(email).trim().toLowerCase();
 
     try {
-        const user = await UserModel.findOne({ sanitizedEmail });
+        const user = await UserModel.findOne({ email: sanitizedEmail });
 
         // always return success
         if (!user) {
