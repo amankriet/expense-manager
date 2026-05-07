@@ -5,6 +5,8 @@ import { useAuth } from "./hooks/use-auth";
 import NotFound from "./pages/NotFound";
 import AuthScreen from "./components/AuthScreen";
 import Dashboard from "./pages/Dashboard";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
 
 function App() {
   return (
@@ -13,6 +15,8 @@ function App() {
         <Routes>
           <Route path="/signin" element={<AuthScreen mode="signin" />} />
           <Route path="/signup" element={<AuthScreen mode="signup" />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/404" element={<NotFound />} />
           <Route
             path="/"

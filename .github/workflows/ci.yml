@@ -99,9 +99,12 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
           JWT_REFRESH_SECRET_KEY: ${{ secrets.JWT_REFRESH_SECRET_KEY }}
+          JWT_PASSWORD_RESET_SECRET: ${{ secrets.JWT_PASSWORD_RESET_SECRET }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           JWT_ACCESS_TOKEN_EXPIRATION: 15m
           JWT_REFRESH_TOKEN_EXPIRATION: 1d
-          JWT_LOGOUT_TOKEN_EXPIRATION: 1s
+          JWT_PASSWORD_RESET_TOKEN_EXPIRATION: 15m
+          CLIENT_URL: https://www.amankriet.com
 
       - name: Test server startup
         working-directory: ./server
@@ -117,9 +120,12 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
           JWT_REFRESH_SECRET_KEY: ${{ secrets.JWT_REFRESH_SECRET_KEY }}
+          JWT_PASSWORD_RESET_SECRET: ${{ secrets.JWT_PASSWORD_RESET_SECRET }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           JWT_ACCESS_TOKEN_EXPIRATION: 15m
           JWT_REFRESH_TOKEN_EXPIRATION: 1d
-          JWT_LOGOUT_TOKEN_EXPIRATION: 1s
+          JWT_PASSWORD_RESET_TOKEN_EXPIRATION: 15m
+          CLIENT_URL: https://www.amankriet.com
 
   docker-build:
     runs-on: ubuntu-latest
@@ -152,7 +158,6 @@ jobs:
             -e JWT_REFRESH_SECRET_KEY="$JWT_REFRESH_SECRET_KEY" \
             -e JWT_ACCESS_TOKEN_EXPIRATION=15m \
             -e JWT_REFRESH_TOKEN_EXPIRATION=1d \
-            -e JWT_LOGOUT_TOKEN_EXPIRATION=1s \
             expense-manager-backend:test-${{ github.sha }}
           sleep 10
           docker stop test-backend || true

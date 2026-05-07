@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useAuth } from "../hooks/use-auth";
 import { useState, type FormEvent } from "react";
@@ -164,7 +164,7 @@ function AuthScreen({ mode }: { mode: "signin" | "signup" }) {
               ? "Create account"
               : "Sign in"}
         </PrimaryButton>
-
+        {!isSignup && <Link to="/forgot-password">Forgot Password?</Link>}
         <SwitchText>
           {isSignup ? "Already have an account?" : "New here?"}{" "}
           <button
