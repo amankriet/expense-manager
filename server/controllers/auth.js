@@ -10,7 +10,8 @@ export const login = async (req, res) => {
 
     try {
         // Find user by email
-        const user = await UserModel.findOne({ email });
+        const sanitizedEmail = String(email).trim().toLowerCase();
+        const user = await UserModel.findOne({ sanitizedEmail });
 
         if (!user || !compareSync(password, user.password)) {
             return res.status(401).json({
@@ -87,7 +88,8 @@ export const signup = async (req, res) => {
 
     try {
         // check if user already exists
-        const existingUser = await UserModel.findOne({ email });
+        const sanitizedEmail = String(email).trim().toLowerCase();
+        const existingUser = await UserModel.findOne({ sanitizedEmail });
         if (existingUser) {
             return res.status(409).json({
                 success: false,
@@ -306,9 +308,10 @@ export const handleRefreshToken = async (req, res) => {
 
 export const forgotPassword = async (req, res) => {
     const { email } = req.body;
+    const sanitizedEmail = String(email).trim().toLowerCase();
 
     try {
-        const user = await UserModel.findOne({ email });
+        const user = await UserModel.findOne({ sanitizedEmail });
 
         // always return success
         if (!user) {
