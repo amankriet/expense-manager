@@ -25,6 +25,8 @@ export const theme = {
     danger: "#9a2d26",
     dangerBorder: "#e7c4bd",
     dangerSurface: "#fff1ee",
+    success: "#2e7d32",
+    successSurface: "#e8f5e9",
   },
   spacing: {
     xxs: "2px",
@@ -41,6 +43,7 @@ export const theme = {
   },
   radii: {
     md: "8px",
+    lg: "18px",
   },
   sizes: {
     pageMax: "1220px",
@@ -51,6 +54,7 @@ export const theme = {
     fixedColumn: "-8px 0 12px -12px rgba(38, 54, 47, 0.35)",
     focus: "0 0 0 3px rgba(38, 54, 47, 0.12)",
     focusOutline: "3px solid rgba(38, 54, 47, 0.18)",
+    lg: "0 12px 32px rgba(0, 0, 0, 0.16)",
   },
   breakpoints: {
     mobile: "560px",

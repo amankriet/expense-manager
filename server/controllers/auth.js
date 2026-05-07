@@ -1,8 +1,9 @@
 import jwt from "jsonwebtoken"
 import UserModel from "../models/UserModel.js"
-import { compareSync } from "@node-rs/bcrypt"
+import { compareSync, hashSync } from "@node-rs/bcrypt"
 import { ERROR_LOGS_FILE, EXCLUDED_FIELDS } from "../utils/common.js"
 import logger from "../middlewares/logger.js";
+import { resend } from "../config/resend.js";
 
 export const login = async (req, res) => {
     const { email, password } = req.body
@@ -302,3 +303,97 @@ export const handleRefreshToken = async (req, res) => {
         })
     }
 }
+
+export const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const user = await UserModel.findOne({ email });
+
+        // always return success
+        if (!user) {
+            return res.status(200).json({
+                success: true,
+                message:
+                    "If an account exists, a password reset link has been sent.",
+            });
+        }
+
+        const resetToken = jwt.sign(
+            {
+                id: user._id,
+                email: user.email,
+                type: "password-reset",
+            },
+            process.env.JWT_PASSWORD_RESET_SECRET,
+            {
+                expiresIn: process.env.JWT_PASSWORD_RESET_TOKEN_EXPIRATION,
+            }
+        );
+
+        const resetLink =
+            `${process.env.CLIENT_URL}/reset-password?token=${resetToken}`;
+
+        await resend.emails.send({
+            from: "Expense Manager <no-reply@amankriet.com>",
+            to: email,
+            subject: "Reset your password",
+            html: `
+                <h2>Password Reset</h2>
+                <p>Click below to reset your password:</p>
+                <a href="${resetLink}">Reset Password</a>
+            `,
+        });
+
+        return res.status(200).json({
+            success: true,
+            message:
+                "If an account exists, a password reset link has been sent.",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong",
+            error: error.toString(),
+        });
+    }
+};
+
+export const resetPassword = async (req, res) => {
+    const { token, password } = req.body;
+
+    try {
+        const decoded = jwt.verify(
+            token,
+            process.env.JWT_PASSWORD_RESET_SECRET
+        );
+
+        if (decoded.type !== "password-reset") {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid token",
+            });
+        }
+
+        const hashedPassword = hashSync(password, 10);
+
+        await UserModel.findByIdAndUpdate(decoded.id, {
+            $set: {
+                password: hashedPassword,
+                refreshTokens: [],
+                passwordChangedAt: new Date(),
+            },
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Password reset successful",
+        });
+    } catch (error) {
+        return res.status(401).json({
+            success: false,
+            message: "Invalid or expired token",
+            error: error.toString(),
+        });
+    }
+};
