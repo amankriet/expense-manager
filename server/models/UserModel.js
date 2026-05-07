@@ -38,16 +38,52 @@ const UserSchema = new Schema(
     lastUpdatedBy: {
       type: Types.ObjectId,
       default: null
-    }
+    },
+    lastLoginAt: {
+      type: Date,
+      default: null,
+    },
+    lastLogoutAt: {
+      type: Date,
+      default: null,
+    },
+    lastPasswordChangedAt: {
+      type: Date,
+      default: null,
+    },
+    lastTokenRefreshAt: {
+      type: Date,
+      default: null,
+    },
+    refreshTokens: [
+      {
+        token: {
+          type: String,
+          required: true,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+        userAgent: String,
+      },
+    ]
   },
-  { id: false },
-  { timestamps: true }
+  {
+    id: false,
+    timestamps: true
+  }
 );
 
 UserSchema.pre("save", function (next) {
-  this.password = hashSync(this.password, 10)
-  next()
-})
+  if (!this.isModified("password")) {
+    return next();
+  }
+
+  this.password = hashSync(this.password, 10);
+
+  next();
+});
 
 UserSchema.virtual("fullName").get(function () {
   return `${this.firstName} ${this.lastName}`

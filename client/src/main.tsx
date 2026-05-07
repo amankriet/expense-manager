@@ -6,8 +6,18 @@ import { createGlobalStyle, ThemeProvider } from "styled-components";
 import { ConfigProvider } from "antd";
 import { antdTheme, theme } from "./theme/index.ts";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import "./api/interceptors.ts";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
+      retry: 1,
+    },
+  },
+});
 
 const GlobalStyle = createGlobalStyle`
   :root {
@@ -33,5 +43,5 @@ createRoot(document.getElementById("root")!).render(
         </ConfigProvider>
       </ThemeProvider>
     </QueryClientProvider>
-  </StrictMode>
+  </StrictMode>,
 );
