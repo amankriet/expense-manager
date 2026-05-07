@@ -95,7 +95,6 @@ JWT_SECRET_KEY=your_secret_key
 JWT_REFRESH_SECRET_KEY=your_refresh_secret_key
 JWT_ACCESS_TOKEN_EXPIRATION=1d
 JWT_REFRESH_TOKEN_EXPIRATION=1d
-JWT_LOGOUT_TOKEN_EXPIRATION=1s
 DATABASE_URL=mongodb://localhost:27017/expense_manager_development
 ```
 
