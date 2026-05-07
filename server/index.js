@@ -13,6 +13,8 @@ const __dirname = path.resolve()
 
 const app = express()
 
+app.set("trust proxy", 1);
+
 const whiteList = [
     'http://localhost:3001',
     'http://localhost:3000',
