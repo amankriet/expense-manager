@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { message } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
-
 import { apiClient } from "../api/http";
-
 import {
   AuthCard,
   AuthContainer,
@@ -13,7 +11,6 @@ import {
   AuthStack,
   AuthTitle,
 } from "../components/AuthStyledComponents";
-
 import {
   Field,
   FormHeader,
@@ -21,6 +18,7 @@ import {
   LogoMark,
   PrimaryButton,
 } from "../components/StyledComponents";
+import { getErrorMessage } from "../utils/helpers";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -57,8 +55,8 @@ export default function ResetPassword() {
       message.success("Password reset successful");
 
       navigate("/signin");
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "Reset link expired");
+    } catch (error: unknown) {
+      setError(getErrorMessage(error));
     } finally {
       setLoading(false);
     }

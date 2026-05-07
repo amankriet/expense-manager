@@ -19,6 +19,7 @@ import {
   PrimaryButton,
 } from "../components/StyledComponents";
 import styled from "styled-components";
+import { getErrorMessage } from "../utils/helpers";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -43,8 +44,8 @@ export default function ForgotPassword() {
       );
 
       setEmail("");
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "Something went wrong");
+    } catch (error: unknown) {
+      setError(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
