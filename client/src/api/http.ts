@@ -10,14 +10,13 @@ const getApiBaseUrl = () => {
 
 export const apiClient = axios.create({
   baseURL: getApiBaseUrl(),
-  withCredentials: true,
 });
 
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
 
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers.Authorization = token;
   }
 
   return config;

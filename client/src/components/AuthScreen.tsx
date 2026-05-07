@@ -42,7 +42,6 @@ function AuthScreen({ mode }: { mode: "signin" | "signup" }) {
         password: form.password,
       });
     },
-    retry: 0,
     onSuccess: (data) => {
       signin(data.tokens.accessToken, data.user, () =>
         navigate("/", { replace: true }),

@@ -20,14 +20,20 @@ const whiteList = [
     'https://www.amankriet.com',
     'https://amankriet.com',
 ]
+const corsOptionsDelegate = function (req, callback) {
+    let corsOptions;
+    if (whiteList.indexOf(req.header('Origin')) !== -1 || !req.header('Origin')) {
+        corsOptions = { origin: true } // reflect (enable) the requested origin in the CORS response
+    } else {
+        corsOptions = { origin: false } // disable CORS for this request
+    }
+    callback(null, corsOptions) // callback expects two parameters: error and options
+}
 
-app.use(cookieParser())
-app.use(cors({
-    origin: whiteList,
-    credentials: true
-}))
+app.use(cors(corsOptionsDelegate))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+app.use(cookieParser())
 app.use(passport.initialize())
 app.use(ensureDatabaseConnection)
 
@@ -36,7 +42,7 @@ const routersPath = path.join(__dirname, "routes")
 
 try {
     // read all files in the "/routes" directory
-    for (const file of fs.readdirSync(routersPath)) {
+    fs.readdirSync(routersPath).map(async (file) => {
         if (file.endsWith("js")) {
             // dynamically import the router module
             const routerModule = await import(path.join(routersPath, file))
@@ -47,7 +53,7 @@ try {
             // noinspection JSCheckFunctionSignatures
             app.use(path.join("/v1", file.split(".")[0]), router)
         }
-    }
+    })
     // check res.http file for all available routes
 } catch (err) {
     console.error(err)
