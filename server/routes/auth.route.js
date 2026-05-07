@@ -2,8 +2,10 @@ import { Router } from 'express';
 import passport from 'passport';
 import { handleRefreshToken, login, logout, logoutAll, signup } from '../controllers/auth.js';
 import { verifyRefreshToken } from '../middlewares/verifyRefreshToken.js';
+import { authLimiter } from '../middlewares/rateLimit.js';
 
-const authRouter = Router();
+const authRouter = Router()
+authRouter.use(authLimiter)
 
 authRouter
   .post('/login', login)
