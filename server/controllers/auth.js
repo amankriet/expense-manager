@@ -33,23 +33,29 @@ export const login = async (req, res) => {
         });
 
         const loginData = await UserModel.findByIdAndUpdate(user._id, {
-            $set: {
-                refreshToken,
-                lastUpdatedBy: user._id
+            $push: {
+                refreshTokens: {
+                    $each: [
+                        {
+                            token: refreshToken,
+                            userAgent: req.headers["user-agent"],
+                        },
+                    ],
+                    $slice: -5,
+                },
             },
-            $currentDate: { lastModified: true }
-        }, {
-            new: true
-        }).select(EXCLUDED_FIELDS)
-
-        console.log('loginData:', loginData)
+            $set: {
+                lastUpdatedBy: user._id,
+                lastLoginAt: new Date(),
+            },
+        });
 
         res.cookie("jwt", refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // Set secure flag in production 
-            sameSite: "lax",
-            maxAge: 30 * 60 * 60 * 1000
-        })
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
 
         return res.status(200).json({
             success: true,
@@ -63,7 +69,7 @@ export const login = async (req, res) => {
                 role: user.role
             },
             tokens: {
-                accessToken: `Bearer ${accessToken}`
+                accessToken: accessToken
             }
         });
     } catch (error) {
@@ -120,7 +126,7 @@ export const signup = async (req, res) => {
                     role: role
                 },
                 tokens: {
-                    accessToken: `Bearer ${accessToken}`
+                    accessToken: accessToken
                 }
             });
         }
@@ -143,12 +149,66 @@ export const signup = async (req, res) => {
     }
 };
 
-export const logout = (req, res) => {
-    req.logout(() => res.status(200).json({
-        success: true,
-        message: "Logout Successful",
+export const logout = async (req, res) => {
+    try {
+        const refreshToken = req.cookies.jwt;
+
+        if (refreshToken) {
+            try {
+                const decoded = jwt.verify(
+                    refreshToken,
+                    process.env.JWT_REFRESH_SECRET_KEY
+                );
+
+                await UserModel.findByIdAndUpdate(decoded.id, {
+                    $pull: {
+                        refreshTokens: {
+                            token: refreshToken,
+                        },
+                    },
+
+                    $set: {
+                        lastLogoutAt: new Date(),
+                    },
+                });
+            } catch (error) {
+                // invalid token → still clear cookie
+                console.log(error);
+                logger(error, 'errorLogs.txt')
+            }
+        }
+
+        res.clearCookie("jwt", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite:
+                process.env.NODE_ENV === "production"
+                    ? "none"
+                    : "lax",
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Logged out successfully",
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Logout failed",
+            error: error.toString(),
+        });
+    }
+};
+
+export const logoutAll = async (req, res) => {
+    await UserModel.findByIdAndUpdate(req.user._id, {
+        $set: {
+            refreshTokens: [],
+            lastLogoutAt: new Date()
+        }
     })
-    )
+    res.clearCookie("jwt");
 }
 
 export const handleRefreshToken = async (req, res) => {
@@ -186,21 +246,38 @@ export const handleRefreshToken = async (req, res) => {
         });
 
         // Update refresh token in DB
+        const oldRefreshToken = req.cookies.jwt;
+
         await UserModel.findByIdAndUpdate(req.user._id, {
-            $set: {
-                refreshToken,
-                lastUpdatedBy: req.user._id
+            $pull: {
+                refreshTokens: {
+                    token: oldRefreshToken,
+                },
             },
-            $currentDate: { lastModified: true }
+            $push: {
+                refreshTokens: {
+                    $each: [
+                        {
+                            token: refreshToken,
+                            userAgent: req.headers["user-agent"],
+                        },
+                    ],
+                    $slice: -5,
+                },
+            },
+            $set: {
+                lastUpdatedBy: req.user._id,
+                lastTokenRefreshAt: new Date(),
+            },
         });
 
         // Send new refresh token as cookie
         res.cookie("jwt", refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // Set secure flag in production
+            secure: process.env.NODE_ENV === "production",
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-            maxAge: 30 * 60 * 60 * 1000
-        })
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
 
         return res.status(200).json({
             success: true,
@@ -213,7 +290,7 @@ export const handleRefreshToken = async (req, res) => {
                 name: `${req.user.firstName} ${req.user.lastName}`
             },
             tokens: {
-                accessToken: `Bearer ${accessToken}`
+                accessToken: accessToken
             }
         });
     } catch (error) {

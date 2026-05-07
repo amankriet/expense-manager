@@ -20,8 +20,5 @@
   },
   "engines": {
     "node": ">=20.19.0"
-  },
-  "dependencies": {
-    "@ant-design/icons": "^6.2.2"
   }
 }

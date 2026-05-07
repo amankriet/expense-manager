@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Table, Tooltip } from "antd";
+import { Button, Popconfirm, Segmented, Table, Tooltip } from "antd";
 import type { TableColumnsType } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/use-auth";
@@ -45,6 +45,10 @@ function Dashboard() {
   const [form, setForm] = useState<TransactionFormData>(blankTransaction);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
+  type FilterView = "daily" | "monthly" | "yearly";
+
+  const [filterView, setFilterView] = useState<FilterView>("monthly");
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   const transactionsQuery = useQuery({
     queryKey: QUERY_KEYS.TRANSACTIONS,
@@ -56,8 +60,31 @@ function Dashboard() {
     [transactionsQuery.data],
   );
 
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter((transaction) => {
+      const transactionDate = new Date(transaction.date);
+
+      if (filterView === "daily") {
+        return (
+          transactionDate.getDate() === currentDate.getDate() &&
+          transactionDate.getMonth() === currentDate.getMonth() &&
+          transactionDate.getFullYear() === currentDate.getFullYear()
+        );
+      }
+
+      if (filterView === "monthly") {
+        return (
+          transactionDate.getMonth() === currentDate.getMonth() &&
+          transactionDate.getFullYear() === currentDate.getFullYear()
+        );
+      }
+
+      return transactionDate.getFullYear() === currentDate.getFullYear();
+    });
+  }, [transactions, filterView, currentDate]);
+
   const summary = useMemo(() => {
-    return transactions.reduce(
+    return filteredTransactions.reduce(
       (totals, transaction) => {
         const amount = Number(transaction.amount) || 0;
 
@@ -68,11 +95,12 @@ function Dashboard() {
         }
 
         totals.balance = totals.income - totals.expense;
+
         return totals;
       },
       { income: 0, expense: 0, balance: 0 },
     );
-  }, [transactions]);
+  }, [filteredTransactions]);
 
   const saveMutation = useMutation({
     mutationFn: () => {
@@ -179,22 +207,79 @@ function Dashboard() {
               style={{ cursor: "pointer", fontSize: 16 }}
             />
           </Tooltip>
-
           <Tooltip title="Delete">
-            <DeleteOutlined
-              onClick={() => deleteMutation.mutate(transaction._id)}
-              style={{
-                cursor: deleteMutation.isPending ? "not-allowed" : "pointer",
-                fontSize: 16,
-                color: "red",
-                opacity: deleteMutation.isPending ? 0.5 : 1,
+            <Popconfirm
+              title="Delete expense"
+              description="This action cannot be undone."
+              okText="Delete"
+              cancelText="Cancel"
+              okButtonProps={{
+                danger: true,
+                loading: deleteMutation.isPending,
               }}
-            />
+              onConfirm={() => deleteMutation.mutate(transaction._id)}
+            >
+              <DeleteOutlined
+                style={{
+                  cursor: deleteMutation.isPending ? "not-allowed" : "pointer",
+                  fontSize: 16,
+                  color: "red",
+                  opacity: deleteMutation.isPending ? 0.5 : 1,
+                }}
+              />
+            </Popconfirm>
           </Tooltip>
         </ActionGroup>
       ),
     },
   ];
+
+  const handlePrevious = () => {
+    const updated = new Date(currentDate);
+
+    if (filterView === "daily") {
+      updated.setDate(updated.getDate() - 1);
+    } else if (filterView === "monthly") {
+      updated.setMonth(updated.getMonth() - 1);
+    } else {
+      updated.setFullYear(updated.getFullYear() - 1);
+    }
+
+    setCurrentDate(updated);
+  };
+
+  const handleNext = () => {
+    const updated = new Date(currentDate);
+
+    if (filterView === "daily") {
+      updated.setDate(updated.getDate() + 1);
+    } else if (filterView === "monthly") {
+      updated.setMonth(updated.getMonth() + 1);
+    } else {
+      updated.setFullYear(updated.getFullYear() + 1);
+    }
+
+    setCurrentDate(updated);
+  };
+
+  const filterLabel = () => {
+    if (filterView === "daily") {
+      return currentDate.toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+    }
+
+    if (filterView === "monthly") {
+      return currentDate.toLocaleDateString("en-IN", {
+        month: "long",
+        year: "numeric",
+      });
+    }
+
+    return currentDate.getFullYear();
+  };
 
   return (
     <DashboardPage>
@@ -345,15 +430,37 @@ function Dashboard() {
               <Eyebrow>Overview</Eyebrow>
               <h2>All transactions</h2>
             </div>
-            <CountBadge>{transactions.length}</CountBadge>
+            <CountBadge>{filteredTransactions.length}</CountBadge>
           </PanelHeader>
+
+          <FilterToolbar>
+            <Segmented
+              value={filterView}
+              onChange={(value) => setFilterView(value as FilterView)}
+              options={[
+                { label: "Daily", value: "daily" },
+                { label: "Monthly", value: "monthly" },
+                { label: "Yearly", value: "yearly" },
+              ]}
+            />
+
+            <DateNavigator>
+              <Button onClick={handlePrevious}>Previous</Button>
+
+              <CurrentFilterLabel>{filterLabel()}</CurrentFilterLabel>
+
+              <Button onClick={handleNext}>Next</Button>
+            </DateNavigator>
+          </FilterToolbar>
 
           <TransactionsTable
             columns={transactionColumns}
-            dataSource={transactions}
+            dataSource={filteredTransactions}
             loading={transactionsQuery.isLoading}
             locale={{ emptyText: "No transactions yet." }}
-            pagination={false}
+            pagination={{
+              pageSize: 4,
+            }}
             rowKey="_id"
             scroll={{ x: 930 }}
           />
@@ -547,4 +654,33 @@ const ActionGroup = styled.div`
   flex-wrap: wrap;
   justify-content: space-around;
   gap: ${({ theme }) => theme.spacing.sm};
+`;
+
+const FilterToolbar = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md};
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+`;
+
+const DateNavigator = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    justify-content: space-between;
+  }
+`;
+
+const CurrentFilterLabel = styled.div`
+  min-width: 140px;
+  text-align: center;
+  font-weight: 700;
 `;
