@@ -5,6 +5,22 @@ import { EXCLUDED_FIELDS, PAGINATION } from "../utils/common.js";
 
 dayjs.extend(localizedFormat);
 
+const allowedFields = [
+  "firstName",
+  "lastName",
+  "email",
+  "password",
+  "mobile",
+  "dob",
+  "role",
+  "lastUpdatedBy",
+  "lastLoginAt",
+  "lastLogoutAt",
+  "lastPasswordChangedAt",
+  "lastTokenRefreshAt",
+  "refreshTokens"
+]
+
 export const getAllUsers = async (req, res) => {
   if (req.error) {
     return res.status(401).json({
@@ -197,6 +213,8 @@ export const updateUser = async (req, res) => {
 async function updateUserByID(id, req, admin) {
   const { role } = req.body;
   const userID = req.user.id
+  const sanitizedUserId = new mongoose.Types.ObjectId(userID);
+  const sanitizedId = new mongoose.Types.ObjectId(id);
 
   if (!admin && role === "admin") {
     req.error = "User role cannot be modified by user itself. Please contact admin"
@@ -204,9 +222,16 @@ async function updateUserByID(id, req, admin) {
   }
 
   try {
-    return await UserModel.findByIdAndUpdate(id, {
+    const updates = {}
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    });
+
+    return await UserModel.findByIdAndUpdate(sanitizedId, {
       $set: {
-        ...req.body, lastUpdatedBy: userID
+        ...updates, lastUpdatedBy: sanitizedUserId
       },
       $currentDate: { lastModified: true }
     }, {

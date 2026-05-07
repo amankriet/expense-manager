@@ -3,6 +3,15 @@ import { PAGINATION, EXCLUDED_FIELDS } from "../utils/common.js"
 
 const getAuthenticatedUserId = (req) => req.user?._id || req.user?.id
 
+const allowedFields = [
+    "title",
+    "amount",
+    "category",
+    "date",
+    "description",
+    "type",
+];
+
 export const addExpense = async (req, res) => {
     const userId = getAuthenticatedUserId(req)
 
@@ -15,9 +24,16 @@ export const addExpense = async (req, res) => {
     }
 
     try {
+        const updates = {}
+        allowedFields.forEach((field) => {
+            if (req.body[field] !== undefined) {
+                updates[field] = req.body[field];
+            }
+        });
+
         const expense = await ExpenseModel.create({
             userId,
-            ...req.body
+            ...updates
         })
 
         if (expense) {
@@ -175,6 +191,7 @@ export const updateExpense = async (req, res) => {
     }
 
     const expenseid = req.query.id
+    const sanitizedExpenseId = new mongoose.Types.ObjectId(expenseid);
 
     if (!expenseid) {
         return res.status(400).json({
@@ -185,9 +202,16 @@ export const updateExpense = async (req, res) => {
     }
 
     try {
+        const updates = {}
+        allowedFields.forEach((field) => {
+            if (req.body[field] !== undefined) {
+                updates[field] = req.body[field];
+            }
+        });
+
         const expense = await ExpenseModel.findOneAndUpdate(
-            { _id: expenseid, userId },
-            req.body,
+            { _id: sanitizedExpenseId, userId },
+            updates,
             { new: true, runValidators: true }
         ).select(EXCLUDED_FIELDS)
 
