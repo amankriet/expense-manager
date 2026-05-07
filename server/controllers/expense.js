@@ -136,6 +136,7 @@ export const getExpense = async (req, res) => {
     }
 
     const expenseid = req.query.id
+    const sanitizedExpenseId = new mongoose.Types.ObjectId(expenseid);
 
     if (!expenseid) {
         return res.status(400).json({
@@ -146,7 +147,7 @@ export const getExpense = async (req, res) => {
     }
 
     try {
-        const expense = await ExpenseModel.findOne({ _id: expenseid, userId })
+        const expense = await ExpenseModel.findOne({ _id: sanitizedExpenseId, userId })
             .select(EXCLUDED_FIELDS)
 
         if (expense) {
@@ -257,6 +258,7 @@ export const deleteExpense = async (req, res) => {
     }
 
     const expenseid = req.query.id
+    const sanitizedExpenseId = new mongoose.Types.ObjectId(expenseid);
 
     if (!expenseid) {
         return res.status(400).json({
@@ -268,7 +270,7 @@ export const deleteExpense = async (req, res) => {
 
     try {
         const expense = await ExpenseModel.findOneAndDelete({
-            _id: expenseid,
+            _id: sanitizedExpenseId,
             userId
         }).select(EXCLUDED_FIELDS)
 
