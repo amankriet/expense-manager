@@ -9,10 +9,12 @@
 import { Router } from "express";
 import passport from "passport";
 import { addExpense, deleteExpense, getAllExpenses, getExpense, updateExpense } from "../controllers/expense.js";
+import { apiLimiter } from "../middlewares/rateLimit.js";
 
 const expenseRouter = Router()
 
 expenseRouter.use(passport.authenticate("jwt", { session: false }))
+expenseRouter.use(apiLimiter)
 
 expenseRouter
   .get("/", getExpense)
