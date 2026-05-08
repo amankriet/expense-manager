@@ -293,6 +293,7 @@ export const deleteUser = async (req, res) => {
 }
 
 async function deleteUserById(id) {
-  return UserModel.findByIdAndDelete(id)
+  const sanitizedId = new mongoose.Types.ObjectId(id);
+  return UserModel.findByIdAndDelete(sanitizedId)
     .select(EXCLUDED_FIELDS)
 }
